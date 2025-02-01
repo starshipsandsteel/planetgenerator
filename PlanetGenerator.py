@@ -57,7 +57,7 @@ def newplanet():
     size=random.choice(planetsize)
     numfeat=random.randint(1,4)
     features=random.sample(planetfeatures,numfeat)
-    featurelist=",".join(features)
+    featurelist=", ".join(features)
     mood=random.choice(planetmood)
     icecaps=random.choice(planeticecaps)
 
