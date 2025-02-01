@@ -175,7 +175,7 @@ def planet_graphics(type):
 
     # Color scale for terrain
     #planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal"]
-    colortype={"Desert":[[0,'blue'][0.4,"yellow"]],
+    colortype={"Desert":[[0,'blue'],[0.4,"yellow"]],
                "Jungle":[[0.0, 'blue'],[0.4, 'cyan'], [0.5, 'green'], [0.7, 'brown'], [1.0, 'white']],
                "Volcanic":[[0.0, '#2D0000'],[0.4, '#501212'], [0.5, '#76441f'], [0.7, 'brown'], [1.0, 'black']],
                "Oceanic":[[0.0, 'blue'],[0.4, 'cyan'], [0.5, 'green'], [0.7, 'brown'], [1.0, 'white']],
