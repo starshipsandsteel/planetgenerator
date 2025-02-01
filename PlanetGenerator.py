@@ -127,10 +127,6 @@ planet_dict=newplanet()
 col1, col2 = st.columns(2)
 for x in planet_dict:
     col1.write (f"{x.title()}: {planet_dict[x]}")
-#planetfile=r"D:\00_Projects\2025 Campaign - 2nd Saturday\Sci-Fi 2025\Planetary Images and Maps\planets.json"
+
 if(st.button("Generate New World")):
     planet_dict=newplanet()
-'''
-with open(planetfile,'a',encoding='utf-8') as outfile:
-    json.dump(planet_dict,outfile)
-'''
