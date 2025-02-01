@@ -226,7 +226,7 @@ for x in planet_dict:
     col1.write (f"{x.title()}: {planet_dict[x]}")
 
 
-st.plotly_chart(planet_fig,use_container_width=False)
+col2.plotly_chart(planet_fig,use_container_width=False)
 with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
     if(st.button("Generate New World")):
