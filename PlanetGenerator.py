@@ -184,20 +184,6 @@ def planet_graphics(type):
                "Crystal":[[0.0, '#C54F9E'],[0.4, '#BF3893'], [0.5, '#6B2E57'], [0.7, '#CECB24'], [1.0, '#F9F401']],
                }
     colorscale=colortype[type]
-    colorscale3 = [
-        [0.0, 'blue'],    # Deep water
-        [0.4, 'cyan'],    # Shallow water
-        [0.5, 'green'],   # Lowlands
-        [0.7, 'brown'],   # Mountains
-        [1.0, 'white']    # Snowcaps
-    ]
-    colorscale2 = [
-        [0.0, '#2D0000'],    # Deep water
-        [0.4, '#501212'],    # Shallow water
-        [0.5, '#76441f'],   # Lowlands
-        [0.7, 'brown'],   # Mountains
-        [1.0, 'black']    # Snowcaps
-    ]
 
     # Create the globe plot
     fig = go.Figure(data=[
@@ -213,6 +199,7 @@ def planet_graphics(type):
             opacity=1.0
         )
     ])
+    
     fig.update_layout(
     autosize=False,
     width=500,
@@ -237,6 +224,7 @@ for x in planet_dict:
 
 
 col2.plotly_chart(planet_fig,use_container_width=False)
+
 with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
     if(st.button("Generate New World")):
