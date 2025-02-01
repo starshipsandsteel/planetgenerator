@@ -1,7 +1,6 @@
 ## Planet Generator
 
 import random
-import json
 import streamlit as st
 
 def newplanet():
