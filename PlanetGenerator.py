@@ -199,7 +199,7 @@ def planet_graphics(type):
             opacity=1.0
         )
     ])
-    
+
     fig.update_layout(
     autosize=False,
     width=500,
@@ -214,6 +214,20 @@ def planet_graphics(type):
     )
     return fig
 
+
+st.markdown(
+    """
+    <style>
+        [data-testid=stSidebar] [data-testid=stButton]{
+            text-align: center;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+        }
+    </style>
+    """, unsafe_allow_html=True
+)
 
 st.title("Planet Generator")
 planet_dict=newplanet()
