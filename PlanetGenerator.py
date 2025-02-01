@@ -128,5 +128,6 @@ col1, col2 = st.columns(2)
 for x in planet_dict:
     col1.write (f"{x.title()}: {planet_dict[x]}")
 
-if(st.button("Generate New World")):
-    planet_dict=newplanet()
+with st.sidebar:
+    if(st.button("Generate New World")):
+        planet_dict=newplanet()
