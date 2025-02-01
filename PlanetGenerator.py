@@ -11,7 +11,7 @@ def newplanet():
     planetmood=["Vibrant and Lush","Dark and Gritty","Mysterious and Eerie","Ancient and Weathered","Pristine and Serene"]
     planetsettlements=["None","Sparse","Scattered","Dense"]
     planetsettlmentsize=["Outposts","Colony","Towns","Cities","Metropolis"]
-    planetdevelopment=["1","1","2","2","2"]
+    planetdevelopment=["Low","Low","Medium","Medium","High"]
     pricemodifier=[1,1,1,1,1.25,1.25,1.5,1.5,1.75,1.75,2]
     planetarylaw=["Low","Medium","High","Martial","Military"]
     planetdistance=["Close","Medium","Far","Extreme"]
