@@ -131,6 +131,7 @@ for x in planet_dict:
 #planetfile=r"D:\00_Projects\2025 Campaign - 2nd Saturday\Sci-Fi 2025\Planetary Images and Maps\planets.json"
 if(st.button("Generate New World")):
     planet_dict=newplanet()
-
+'''
 with open(planetfile,'a',encoding='utf-8') as outfile:
     json.dump(planet_dict,outfile)
+'''
