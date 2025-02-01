@@ -125,7 +125,7 @@ def newplanet():
                 "hours in day":hoursinday}
     return planet_dict
 
-def planet_graphics():
+def planet_graphics(type):
     # Parameters for random world generation
     resolution = 300            # Higher resolution for smoothness
     radius = 2.0                # Radius of the sphere
@@ -174,7 +174,17 @@ def planet_graphics():
     z_distorted = z * (1 + 0.1 * normalized_elevation/5)
 
     # Color scale for terrain
-    colorscale = [
+    #planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal"]
+    colortype={"Desert":[[0,'blue'][0.4,"yellow"]],
+               "Jungle":[[0.0, 'blue'],[0.4, 'cyan'], [0.5, 'green'], [0.7, 'brown'], [1.0, 'white']],
+               "Volcanic":[[0.0, '#2D0000'],[0.4, '#501212'], [0.5, '#76441f'], [0.7, 'brown'], [1.0, 'black']],
+               "Oceanic":[[0.0, 'blue'],[0.4, 'cyan'], [0.5, 'green'], [0.7, 'brown'], [1.0, 'white']],
+               "Frozen":[[0.0, 'cyan'],[0.4, '#B4ECFF'], [0.5, '#C7E9F5'], [0.7, '#FFFFFF'], [1.0, 'white']],
+               "Rocky":[[0.0, 'cyan'],[0.4, '#674606'], [0.5, '#3F2B05'], [0.7, 'brown'], [1.0, 'white']],
+               "Crystal":[[0.0, '#C54F9E'],[0.4, '#BF3893'], [0.5, '#6B2E57'], [0.7, '#CECB24'], [1.0, '#F9F401']],
+               }
+    colorscale=colortype[type]
+    colorscale3 = [
         [0.0, 'blue'],    # Deep water
         [0.4, 'cyan'],    # Shallow water
         [0.5, 'green'],   # Lowlands
@@ -196,7 +206,7 @@ def planet_graphics():
             y=y_distorted,
             z=z_distorted,
             surfacecolor=normalized_elevation,
-            colorscale=colorscale2,
+            colorscale=colorscale,
             cmin=0,
             cmax=1,
             showscale=False,
@@ -220,7 +230,7 @@ def planet_graphics():
 
 st.title("Planet Generator")
 planet_dict=newplanet()
-planet_fig=planet_graphics()
+planet_fig=planet_graphics(planet_dict["type"])
 col1, col2 = st.columns(2)
 for x in planet_dict:
     col1.write (f"{x.title()}: {planet_dict[x]}")
