@@ -231,7 +231,7 @@ def planet_graphics(type):
 st.title("Planet Generator")
 planet_dict=newplanet()
 planet_fig=planet_graphics(planet_dict["type"])
-col1, col2 = st.columns(2)
+col1, col2 = st.columns(2,vertical_alignment="top",border=True)
 for x in planet_dict:
     col1.write (f"{x.title()}: {planet_dict[x]}")
 
