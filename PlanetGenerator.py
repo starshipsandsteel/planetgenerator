@@ -124,7 +124,8 @@ def newplanet():
                 "gravity":gravity,
                 "hours in day":hoursinday}
     return planet_dict
- def planet_graphics()
+
+def planet_graphics():
     # Parameters for random world generation
     resolution = 300            # Higher resolution for smoothness
     radius = 2.0                # Radius of the sphere
