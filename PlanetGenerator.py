@@ -115,7 +115,7 @@ def newplanet():
                 "law":law,
                 "Price modifier":price,
                 "distance to star":distance,
-                "temperature":temp,
+                "Avg temperature (c)":temp,
                 "atmosphere":atmosphere,
                 "breathability":atmobreathable,
                 "gravity":gravity,
@@ -127,7 +127,6 @@ planet_dict=newplanet()
 col1, col2 = st.columns(2)
 for x in planet_dict:
     col1.write (f"{x.title()}: {planet_dict[x]}")
-
 
 with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
