@@ -2,6 +2,9 @@
 
 import random
 import streamlit as st
+import plotly.graph_objects as go
+import numpy as np
+from noise import snoise3
 
 def newplanet():
     planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal"]
@@ -121,13 +124,108 @@ def newplanet():
                 "gravity":gravity,
                 "hours in day":hoursinday}
     return planet_dict
+ def planet_graphics()
+    # Parameters for random world generation
+    resolution = 300            # Higher resolution for smoothness
+    radius = 2.0                # Radius of the sphere
+    scale = 3.0                 # Controls continent size
+    octaves = 4                 # Detail level
+    persistence = 0.4           # Smooth terrain transitions
+    lacunarity = 2              # Frequency
+
+    # Set random seed for reproducibility
+    #np.random.seed(np.random.randint(0, 1000))
+    np.random.seed(None)
+
+    # Generate spherical coordinates
+    theta = np.linspace(0, 2 * np.pi, resolution)
+    phi = np.linspace(0, np.pi, resolution)
+    theta_grid, phi_grid = np.meshgrid(theta, phi)
+
+    # Convert spherical coordinates to Cartesian
+    x = radius * np.sin(phi_grid) * np.cos(theta_grid)
+    y = radius * np.sin(phi_grid) * np.sin(theta_grid)
+    z = radius * np.cos(phi_grid)
+
+    # Apply Simplex noise for elevation
+    def generate_elevation(x, y, z):
+        elevation = np.zeros_like(x)
+        for i in range(resolution):
+            for j in range(resolution):
+                nx = x[i, j] * scale
+                ny = y[i, j] * scale
+                nz = z[i, j] * scale
+                elevation[i, j] = snoise3(
+                    nx, ny, nz,
+                    octaves=octaves,
+                    persistence=persistence,
+                    lacunarity=lacunarity
+                )
+        return elevation
+
+    # Generate elevation data
+    elevation = generate_elevation(x, y, z)
+    normalized_elevation = (elevation - elevation.min()) / (elevation.max() - elevation.min())
+
+    # Apply elevation to create mountains and valleys
+    x_distorted = x * (1 + 0.1 * normalized_elevation/5)
+    y_distorted = y * (1 + 0.1 * normalized_elevation/5)
+    z_distorted = z * (1 + 0.1 * normalized_elevation/5)
+
+    # Color scale for terrain
+    colorscale = [
+        [0.0, 'blue'],    # Deep water
+        [0.4, 'cyan'],    # Shallow water
+        [0.5, 'green'],   # Lowlands
+        [0.7, 'brown'],   # Mountains
+        [1.0, 'white']    # Snowcaps
+    ]
+    colorscale2 = [
+        [0.0, '#2D0000'],    # Deep water
+        [0.4, '#501212'],    # Shallow water
+        [0.5, '#76441f'],   # Lowlands
+        [0.7, 'brown'],   # Mountains
+        [1.0, 'black']    # Snowcaps
+    ]
+
+    # Create the globe plot
+    fig = go.Figure(data=[
+        go.Surface(
+            x=x_distorted,
+            y=y_distorted,
+            z=z_distorted,
+            surfacecolor=normalized_elevation,
+            colorscale=colorscale2,
+            cmin=0,
+            cmax=1,
+            showscale=False,
+            opacity=1.0
+        )
+    ])
+    fig.update_layout(
+    autosize=False,
+    width=500,
+    height=500,
+    scene=dict(
+        xaxis=dict(showbackground=False, visible=False),
+        yaxis=dict(showbackground=False, visible=False),
+        zaxis=dict(showbackground=False, visible=False),
+        aspectmode='data',
+        bgcolor='black'
+        )
+    )
+    return fig
+
 
 st.title("Planet Generator")
 planet_dict=newplanet()
+planet_fig=planet_graphics()
 col1, col2 = st.columns(2)
 for x in planet_dict:
     col1.write (f"{x.title()}: {planet_dict[x]}")
 
+
+st.plotly_chart(planet_fig,use_container_width=False)
 with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
     if(st.button("Generate New World")):
