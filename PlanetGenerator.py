@@ -124,14 +124,18 @@ def newplanet():
                 "hours in day":hoursinday}
     return planet_dict
 
-def planet_graphics(type,caps):
+def planet_graphics(type,caps,size):
+    
+    psize={"Dwarf":0.75,"Small":1,"Medium":1.25,"Large":1.75,"Giant":2,"Gas Giant Moon":0.70}
+    size_attrib=psize[size]
+    sizeres=size_attrib*400
     # Parameters for random world generation
-    resolution = 400            # Higher resolution for smoothness
-    radius = 1                  # Radius of the sphere
-    base_scale = 2.0            # Base scale for continent size
-    octaves = 5                 # Detail level
-    persistence = 0.6           # Smooth terrain transitions
-    lacunarity = 2.0            # Frequency
+    resolution = int(sizeres)       # Higher resolution for smoothness
+    radius = size_attrib            # Radius of the sphere
+    base_scale = size_attrib*1.5    # Base scale for continent size
+    octaves = 5                     # Detail level
+    persistence = 0.6               # Smooth terrain transitions
+    lacunarity = 2.0                # Frequency
 
     # Randomize parameters for unique worlds
     np.random.seed()  # Ensures randomness on each run
@@ -201,9 +205,9 @@ def planet_graphics(type,caps):
     #planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal"]
     colortype={"Desert":[[0.0,'cyan'],[0.1,"#c4830d"],[0.5,"#aa6d04"],[0.7,"#835204"],[0.9,"#643c04"],[1,"#E0FFFF"]],
                "Jungle":[[0.0, 'blue'],[0.3, 'cyan'], [0.4, 'green'], [0.7, 'darkgreen'],[0.8, 'saddlebrown'], [0.9, 'white'],[1,"#E0FFFF"]],
-               "Volcanic":[[0.0, '#ff0800'],[0.3, '#560319'],[0.4, '#65000b '], [0.5, '#a81c07 '], [0.6, '#321414  '],[0.7, 'brown'], [0.9, 'black'],[1,"#E0FFFF"]],
-               "Oceanic":[[0.0, 'navy'],[0.5, 'blue'],[0.6, 'lightseagreen'], [0.75, 'cyan'], [0.8, 'green'], [0.9, 'white'],[1,"#E0FFFF"]],
-               "Frozen":[[0.0, 'cyan'],[0.4, '#B4ECFF'], [0.5, '#C7E9F5'], [0.7, '#FFFFFF'], [0.9, 'white'],[1,"#E0FFFF"]],
+               "Volcanic":[[0.0, '#ff0800'],[0.2, '#560319'],[0.3, '#65000b '], [0.35, '#a81c07 '], [0.6, '#321414  '],[0.7, 'brown'], [0.9, 'black'],[1,"#E0FFFF"]],
+               "Oceanic":[[0.0, 'navy'],[0.5, 'blue'],[0.6, '#3c99dc'], [0.75, 'cyan'], [0.8, 'green'], [0.9, 'white'],[1,"#E0FFFF"]],
+               "Frozen":[[0.0, 'cyan'],[0.4, '#B4ECFF'], [0.5, '#C7E9F5'], [0.5, '#eab676'], [0.65, '#FFFFFF'], [0.9, 'white'],[1,"#E0FFFF"]],
                "Rocky":[[0.0, 'cyan'],[0.4, '#674606'], [0.5, '#3F2B05'], [0.7, 'brown'], [0.9, 'white'],[1,"#E0FFFF"]],
                "Crystal":[[0.0, '#C54F9E'],[0.4, '#BF3893'], [0.5, '#6B2E57'], [0.7, '#CECB24'], [0.9, 'white'],[1,"#E0FFFF"]],
                }
@@ -312,10 +316,16 @@ st.markdown(
     """, unsafe_allow_html=True
 )
 st.title("Galactic Catrographers")
-st.header('Planetary Overview')
-col1, col2 = st.columns(2,vertical_alignment="top",border=True)
+
+
 planet_dict=newplanet()
-planet_fig,planet_map=planet_graphics(planet_dict["type"],planet_dict["icecaps"])
+st.header(f'Planetary Overview: {planet_dict["name"]}')
+col1, col2 = st.columns(2,vertical_alignment="top",border=True)
+for x in planet_dict:
+    if x!="name":
+        col1.write (f"{x.title()}: {planet_dict[x]}")
+planet_fig,planet_map=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
+
 
 config_globe = {'displayModeBar': True,
           'use_container_width':False}
@@ -324,8 +334,7 @@ col2.plotly_chart(planet_fig,config=config_globe)
 st.header('Planetary Map View')
 
 st.plotly_chart(planet_map)
-for x in planet_dict:
-    col1.write (f"{x.title()}: {planet_dict[x]}")
+
 
 with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
