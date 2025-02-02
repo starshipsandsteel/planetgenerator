@@ -18,9 +18,9 @@ def newplanet():
     pricemodifier=[1,1,1,1,1.25,1.25,1.5,1.5,1.75,1.75,2]
     planetarylaw=["Low","Medium","High","Martial","Military"]
     planetdistance=["Close","Medium","Far","Extreme"]
-    planetatmospheretype=["Normal","Toxic storms","Acidic rains"]
+    planetatmospheretype=["Normal","Thin","Trace","Thick"]
     planetatmosphere=["Yes","No"]
-    atmobreathable=["Normal","Toxic Clouds, partially breathable","Toxic"]
+    atmobreathable=["Breathable","Breathable","Breathable","Toxic Clouds","Acid Rain"]
     planeticecaps=["None","Small","Medium","Large"]
     planet_prefixes = [
         "Zor", "Kry", "Xan", "Vel", "Qua", 
@@ -61,7 +61,7 @@ def newplanet():
     numfeat=random.randint(1,4)
     features=random.sample(planetfeatures,numfeat)
     featurelist=", ".join(features)
-    mood=random.choice(planetmood)
+    #mood=random.choice(planetmood)
     icecaps=random.choice(planeticecaps)
 
     settlements=random.choice(planetsettlements)
@@ -76,12 +76,15 @@ def newplanet():
         development="N/A"
         price="N/A"
 
-    if planetatmosphere=="Yes":
+    planetatmochoice=random.choice(planetatmosphere)   
+    if type=="Oceanic" or type=="Jungle":
+        planetatmochoice="Yes"
+    if planetatmochoice=="Yes":
         atmosphere=random.choice(planetatmospheretype)
         breathable=random.choice(atmobreathable)
     else:
         atmosphere="None"
-        atmobreathable="No"
+        breathable="None"
 
     distance=random.choice(planetdistance)
 
@@ -119,7 +122,7 @@ def newplanet():
                 "distance to star":distance,
                 "Avg temperature (c)":temp,
                 "atmosphere":atmosphere,
-                "breathability":atmobreathable,
+                "atmosphere notes":breathable,
                 "gravity":gravity,
                 "hours in day":hoursinday}
     return planet_dict
