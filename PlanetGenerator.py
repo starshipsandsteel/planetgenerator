@@ -275,6 +275,7 @@ st.markdown(
             margin-right: auto;
             width: 100%;
         }
+        p { line-height: 1 !important; }
     </style>
     """, unsafe_allow_html=True
 )
@@ -295,3 +296,10 @@ with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
     if(st.button("Generate New World")):
         planet_dict=newplanet()
+    st.write("Welcome to the Planet Generator")
+    st.write("-------------------------------")
+    st.write("This was written to create planets")
+    st.write("for a Sci-Fi Savage Worlds game.")
+    st.write("Scroll down to see a map view of the world,")
+    st.write("and you can use the image controls to save")
+    st.write("the images of the planet.")
