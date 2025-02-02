@@ -329,9 +329,9 @@ for x in planet_dict:
 
 with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
-    if(st.button("Generate New World")):
+    if(st.button("Retrieve New World")):
         planet_dict=newplanet()
-    st.write("Welcome to the Planet Generator")
+    st.write("Welcome to the Department of Galactic Cartography, an online catalog of nearly limitless worlds, surveyed or not.")
     st.write("-------------------------------")
     st.write("This was written to create planets for a Savage Worlds game.")
     st.write("Scroll down to see a map view of the world, and you can use the image controls to save images of the planet globe and map.  Be sure to set them to full screen before you capture them, especially the map.")
