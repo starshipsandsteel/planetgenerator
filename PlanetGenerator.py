@@ -127,7 +127,7 @@ def newplanet():
 def planet_graphics(type,caps):
     # Parameters for random world generation
     resolution = 400            # Higher resolution for smoothness
-    radius = 1.0                # Radius of the sphere
+    radius = 1                  # Radius of the sphere
     base_scale = 2.0            # Base scale for continent size
     octaves = 5                 # Detail level
     persistence = 0.6           # Smooth terrain transitions
@@ -201,7 +201,7 @@ def planet_graphics(type,caps):
     #planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal"]
     colortype={"Desert":[[0.0,'cyan'],[0.1,"#eacf4c"],[0.4,"#d4b623"],[0.8,"#b79c18"],[0.9,"white"],[1,"#E0FFFF"]],
                "Jungle":[[0.0, 'blue'],[0.3, 'cyan'], [0.4, 'green'], [0.7, 'darkgreen'],[0.8, 'saddlebrown'], [0.9, 'white'],[1,"#E0FFFF"]],
-               "Volcanic":[[0.0, '#2D0000'],[0.4, '#501212'], [0.5, '#76441f'], [0.7, 'brown'], [0.9, 'black'],[1,"#E0FFFF"]],
+               "Volcanic":[[0.0, '#ff0800'],[0.3, '#560319'],[0.4, '#65000b '], [0.5, '#a81c07 '], [0.6, '#321414  '],[0.7, 'brown'], [0.9, 'black'],[1,"#E0FFFF"]],
                "Oceanic":[[0.0, 'navy'],[0.5, 'blue'],[0.6, 'lightseagreen'], [0.75, 'cyan'], [0.8, 'green'], [0.9, 'white'],[1,"#E0FFFF"]],
                "Frozen":[[0.0, 'cyan'],[0.4, '#B4ECFF'], [0.5, '#C7E9F5'], [0.7, '#FFFFFF'], [0.9, 'white'],[1,"#E0FFFF"]],
                "Rocky":[[0.0, 'cyan'],[0.4, '#674606'], [0.5, '#3F2B05'], [0.7, 'brown'], [0.9, 'white'],[1,"#E0FFFF"]],
@@ -228,6 +228,9 @@ def planet_graphics(type,caps):
     autosize=False,
     width=800,
     height=700,
+    template='plotly_dark',
+    paper_bgcolor='rgba(0,0,0,0)',
+    plot_bgcolor='rgba(0,0,0,0)',
     scene=dict(
         xaxis=dict(showbackground=False, visible=False),
         yaxis=dict(showbackground=False, visible=False),
@@ -236,6 +239,7 @@ def planet_graphics(type,caps):
         bgcolor='black'
         )
     )
+
 
     # === Flat 2:1 Map Projection ===
     longitude = np.degrees(theta_grid) - 180  # Longitude from -180 to 180
@@ -257,11 +261,14 @@ def planet_graphics(type,caps):
         #title='Flat Map Projection (Equirectangular)',
         #xaxis=dict(title='Longitude', showgrid=False, zeroline=False),
         #yaxis=dict(title='Latitude', showgrid=False, zeroline=False),
+        paper_bgcolor='rgba(0,0,0,0)',
+        template='plotly_dark',
         xaxis=dict(visible=False),
         yaxis=dict(visible=False),
         plot_bgcolor='black',
         width=1800,
     )
+
     return fig,fig_flat
 
 
@@ -276,10 +283,36 @@ st.markdown(
             width: 100%;
         }
         p { line-height: 1 !important; }
+        body {
+            background-color: black;
+            color: #00FF00;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .stApp {
+            background-color: black;
+            color: #00FF00;
+        }
+        p, h1, h2, h3, h4, h5, h6 {
+            color: #00FF00 !important;
+        }
+        .terminal-cursor {
+            display: inline-block;
+            width: 10px;
+            background-color: #00FF00;
+            animation: blink 1s steps(2, start) infinite;
+            margin-left: 2px;
+        }
+        @keyframes blink {
+            to { visibility: hidden; }
+        }
+        [data-testid="stSidebar"] {
+            background-color: black;
+        }
     </style>
     """, unsafe_allow_html=True
 )
-st.title("Planet Generator")
+st.title("Galactic Catrographers")
+st.header('Planetary Overview')
 col1, col2 = st.columns(2,vertical_alignment="top",border=True)
 planet_dict=newplanet()
 planet_fig,planet_map=planet_graphics(planet_dict["type"],planet_dict["icecaps"])
@@ -288,6 +321,7 @@ config_globe = {'displayModeBar': True,
           'use_container_width':False}
 
 col2.plotly_chart(planet_fig,config=config_globe)
+st.header('Planetary Map View')
 st.plotly_chart(planet_map)
 for x in planet_dict:
     col1.write (f"{x.title()}: {planet_dict[x]}")
