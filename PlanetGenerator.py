@@ -200,9 +200,9 @@ def planet_graphics(type,caps):
     # Color scale for terrain
     #planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal"]
     colortype={"Desert":[[0.0,'cyan'],[0.1,"#eacf4c"],[0.4,"#d4b623"],[0.8,"#b79c18"],[0.9,"white"],[1,"#E0FFFF"]],
-               "Jungle":[[0.0, 'blue'],[0.3, 'cyan'], [0.4, 'green'], [0.7, 'brown'], [0.9, 'white'],[1,"#E0FFFF"]],
+               "Jungle":[[0.0, 'blue'],[0.3, 'cyan'], [0.4, 'green'], [0.7, 'darkgreen'],[0.8, 'saddlebrown'], [0.9, 'white'],[1,"#E0FFFF"]],
                "Volcanic":[[0.0, '#2D0000'],[0.4, '#501212'], [0.5, '#76441f'], [0.7, 'brown'], [0.9, 'black'],[1,"#E0FFFF"]],
-               "Oceanic":[[0.0, 'blue'],[0.5, 'cyan'], [0.7, 'green'], [0.8, 'darkgreen'], [0.9, 'white'],[1,"#E0FFFF"]],
+               "Oceanic":[[0.0, 'navy'],[0.5, 'blue'],[0.6, 'lightseagreen'], [0.75, 'cyan'], [0.8, 'green'], [0.9, 'white'],[1,"#E0FFFF"]],
                "Frozen":[[0.0, 'cyan'],[0.4, '#B4ECFF'], [0.5, '#C7E9F5'], [0.7, '#FFFFFF'], [0.9, 'white'],[1,"#E0FFFF"]],
                "Rocky":[[0.0, 'cyan'],[0.4, '#674606'], [0.5, '#3F2B05'], [0.7, 'brown'], [0.9, 'white'],[1,"#E0FFFF"]],
                "Crystal":[[0.0, '#C54F9E'],[0.4, '#BF3893'], [0.5, '#6B2E57'], [0.7, '#CECB24'], [0.9, 'white'],[1,"#E0FFFF"]],
