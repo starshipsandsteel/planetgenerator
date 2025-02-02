@@ -128,7 +128,7 @@ def planet_graphics(type,caps,size):
     
     psize={"Dwarf":0.75,"Small":1,"Medium":1.25,"Large":1.75,"Giant":2,"Gas Giant Moon":0.70}
     size_attrib=psize[size]
-    sizeres=size_attrib*400
+    sizeres=(size_attrib*400)/1.3
     # Parameters for random world generation
     resolution = int(sizeres)       # Higher resolution for smoothness
     radius = size_attrib            # Radius of the sphere
