@@ -209,7 +209,7 @@ def planet_graphics(type,caps,size):
                "Volcanic":[[0.0, '#ff0800'],[0.2, '#560319'],[0.3, '#65000b '], [0.35, '#a81c07 '], [0.6, '#321414  '],[0.7, 'brown'], [0.9, 'black'],[1,"#E0FFFF"]],
                "Oceanic":[[0.0, 'navy'],[0.5, 'blue'],[0.6, '#3c99dc'], [0.75, 'cyan'], [0.8, 'green'], [0.9, 'white'],[1,"#E0FFFF"]],
                "Frozen":[[0.0, 'cyan'],[0.4, '#B4ECFF'], [0.5, '#C7E9F5'], [0.5, '#eab676'], [0.65, '#FFFFFF'], [0.9, 'white'],[1,"#E0FFFF"]],
-               "Rocky":[[0.0, 'cyan'],[0.4, '#674606'], [0.5, '#3F2B05'], [0.7, 'brown'], [0.9, 'white'],[1,"#E0FFFF"]],
+               "Rocky":[[0.0, '#483104'],[0.4, '#674606'], [0.5, '#3F2B05'], [0.7, 'brown'], [0.9, 'white'],[1,"#E0FFFF"]],
                "Crystal":[[0.0, '#C54F9E'],[0.4, '#BF3893'], [0.5, '#6B2E57'], [0.7, '#CECB24'], [0.9, 'white'],[1,"#E0FFFF"]],
                }
     colorscale=colortype[type]
