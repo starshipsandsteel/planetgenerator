@@ -9,7 +9,7 @@ from noise import snoise3
 def newplanet():
     planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal"]
     planetsize=["Dwarf","Small","Small","Medium","Medium","Medium","Large","Giant","Gas Giant Moon"]
-    planetfeatures=["Massive Canyon System","Towering Spires","Unique Weather Phenomenon","Orbital Ring","Massive Sinkholes","Titanic Geysers",
+    planetfeatures=["Massive Canyon System","Towering Spires","Unique Weather Phenomenon","Massive Sinkholes","Titanic Geysers",
                     "Craters","Colossal Fossils", "Hostile Life: Flora","Hostile Life: Fauna"]
     planetmood=["Vibrant and Lush","Dark and Gritty","Mysterious and Eerie","Ancient and Weathered","Pristine and Serene"]
     planetsettlements=["None","Sparse","Scattered","Dense"]
@@ -21,7 +21,7 @@ def newplanet():
     planetatmospheretype=["Normal","Toxic storms","Acidic rains"]
     planetatmosphere=["Yes","No"]
     atmobreathable=["Normal","Toxic Clouds, partially breathable","Toxic"]
-    planeticecaps=["None","Small","Large"]
+    planeticecaps=["None","Small","Medium","Large"]
     planet_prefixes = [
         "Zor", "Kry", "Xan", "Vel", "Qua", 
         "Tel", "Myr", "Gal", "Ar", "Kor", 
@@ -124,13 +124,13 @@ def newplanet():
                 "hours in day":hoursinday}
     return planet_dict
 
-def planet_graphics(type):
+def planet_graphics(type,caps):
     # Parameters for random world generation
-    resolution = 200            # Higher resolution for smoothness
+    resolution = 400            # Higher resolution for smoothness
     radius = 1.0                # Radius of the sphere
-    base_scale = 3.0            # Base scale for continent size
-    octaves = 4                 # Detail level
-    persistence = 0.4           # Smooth terrain transitions
+    base_scale = 2.0            # Base scale for continent size
+    octaves = 5                 # Detail level
+    persistence = 0.6           # Smooth terrain transitions
     lacunarity = 2.0            # Frequency
 
     # Randomize parameters for unique worlds
@@ -174,15 +174,38 @@ def planet_graphics(type):
     y_distorted = y * (1 + 0.1 * normalized_elevation/5)
     z_distorted = z * (1 + 0.1 * normalized_elevation/5)
 
+    # Generate Perlin noise for natural ice cap edges
+    ice_noise = np.zeros_like(x)
+    for i in range(resolution):
+        for j in range(resolution):
+            ice_noise[i, j] = snoise3(
+                i / 50.0, j / 50.0, random_offset[0],
+                octaves=2, persistence=0.5, lacunarity=2.0
+            )
+    # ice dictionary
+    icethresh={"None":90,"Small":80,"Medium":70,"Large":65}
+    ice=icethresh[caps]
+
+    # Ice cap mask with smooth, noisy edges
+    latitude = 90 - np.degrees(phi_grid)      # Latitude from -90 to 90
+    ice_threshold = ice                 # Base latitude for ice caps
+
+    # Apply noise and create a smooth gradient using a sigmoid function
+    dice_transition = (np.abs(latitude) + (ice_noise * 5) - ice_threshold) / 5  # Smoother transition
+    ice_cap_gradient = 1 / (1 + np.exp(-dice_transition))                      # Sigmoid smoothing
+
+    # Blend ice cap gradient with terrain
+    combined_terrain = np.maximum(normalized_elevation, ice_cap_gradient)
+
     # Color scale for terrain
     #planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal"]
-    colortype={"Desert":[[0.0,'cyan'],[0.3,"#eacf4c"],[0.5,"#d4b623"],[0.8,"#b79c18"],[1,"white"]],
-               "Jungle":[[0.0, 'blue'],[0.4, 'cyan'], [0.5, 'green'], [0.7, 'brown'], [1.0, 'white']],
-               "Volcanic":[[0.0, '#2D0000'],[0.4, '#501212'], [0.5, '#76441f'], [0.7, 'brown'], [1.0, 'black']],
-               "Oceanic":[[0.0, 'blue'],[0.5, 'cyan'], [0.6, 'green'], [0.7, 'darkgreen'], [1.0, 'white']],
-               "Frozen":[[0.0, 'cyan'],[0.4, '#B4ECFF'], [0.5, '#C7E9F5'], [0.7, '#FFFFFF'], [1.0, 'white']],
-               "Rocky":[[0.0, 'cyan'],[0.4, '#674606'], [0.5, '#3F2B05'], [0.7, 'brown'], [1.0, 'white']],
-               "Crystal":[[0.0, '#C54F9E'],[0.4, '#BF3893'], [0.5, '#6B2E57'], [0.7, '#CECB24'], [1.0, '#F9F401']],
+    colortype={"Desert":[[0.0,'cyan'],[0.3,"#eacf4c"],[0.5,"#d4b623"],[0.8,"#b79c18"],[0.9,"white"],[1,"#E0FFFF"]],
+               "Jungle":[[0.0, 'blue'],[0.4, 'cyan'], [0.5, 'green'], [0.7, 'brown'], [0.9, 'white'],[1,"#E0FFFF"]],
+               "Volcanic":[[0.0, '#2D0000'],[0.4, '#501212'], [0.5, '#76441f'], [0.7, 'brown'], [0.9, 'black'],[1,"#E0FFFF"]],
+               "Oceanic":[[0.0, 'blue'],[0.5, 'cyan'], [0.6, 'green'], [0.7, 'darkgreen'], [0.9, 'white'],[1,"#E0FFFF"]],
+               "Frozen":[[0.0, 'cyan'],[0.4, '#B4ECFF'], [0.5, '#C7E9F5'], [0.7, '#FFFFFF'], [0.9, 'white'],[1,"#E0FFFF"]],
+               "Rocky":[[0.0, 'cyan'],[0.4, '#674606'], [0.5, '#3F2B05'], [0.7, 'brown'], [0.9, 'white'],[1,"#E0FFFF"]],
+               "Crystal":[[0.0, '#C54F9E'],[0.4, '#BF3893'], [0.5, '#6B2E57'], [0.7, '#CECB24'], [0.9, 'white'],[1,"#E0FFFF"]],
                }
     colorscale=colortype[type]
 
@@ -192,7 +215,7 @@ def planet_graphics(type):
             x=x_distorted,
             y=y_distorted,
             z=z_distorted,
-            surfacecolor=normalized_elevation,
+            surfacecolor=combined_terrain,
             colorscale=colorscale,
             cmin=0,
             cmax=1,
@@ -213,7 +236,33 @@ def planet_graphics(type):
         bgcolor='black'
         )
     )
-    return fig
+
+    # === Flat 2:1 Map Projection ===
+    longitude = np.degrees(theta_grid) - 180  # Longitude from -180 to 180
+    latitude = 90 - np.degrees(phi_grid)      # Latitude from -90 to 90
+
+    fig_flat = go.Figure(data=[
+        go.Heatmap(
+            z=combined_terrain,
+            x=longitude[0],
+            y=latitude[:, 0],
+            colorscale=colorscale,
+            zmin=0,
+            zmax=1,
+            showscale=False
+        )
+    ])
+
+    fig_flat.update_layout(
+        #title='Flat Map Projection (Equirectangular)',
+        #xaxis=dict(title='Longitude', showgrid=False, zeroline=False),
+        #yaxis=dict(title='Latitude', showgrid=False, zeroline=False),
+        xaxis=dict(visible=False),
+        yaxis=dict(visible=False),
+        plot_bgcolor='black',
+        width=1800,
+    )
+    return fig,fig_flat
 
 
 st.markdown(
@@ -232,12 +281,13 @@ st.markdown(
 st.title("Planet Generator")
 col1, col2 = st.columns(2,vertical_alignment="top",border=True)
 planet_dict=newplanet()
-planet_fig=planet_graphics(planet_dict["type"])
+planet_fig,planet_map=planet_graphics(planet_dict["type"],planet_dict["icecaps"])
 
-config = {'displayModeBar': False,
+config_globe = {'displayModeBar': True,
           'use_container_width':False}
-col2.plotly_chart(planet_fig,config=config)
 
+col2.plotly_chart(planet_fig,config=config_globe)
+st.plotly_chart(planet_map)
 for x in planet_dict:
     col1.write (f"{x.title()}: {planet_dict[x]}")
 
