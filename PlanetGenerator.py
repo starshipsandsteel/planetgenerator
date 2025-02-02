@@ -199,7 +199,7 @@ def planet_graphics(type,caps):
 
     # Color scale for terrain
     #planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal"]
-    colortype={"Desert":[[0.0,'cyan'],[0.1,"#eacf4c"],[0.4,"#d4b623"],[0.8,"#b79c18"],[0.9,"white"],[1,"#E0FFFF"]],
+    colortype={"Desert":[[0.0,'cyan'],[0.1,"#c4830d"],[0.5,"#aa6d04"],[0.7,"#835204"],[0.9,"#643c04"],[1,"#E0FFFF"]],
                "Jungle":[[0.0, 'blue'],[0.3, 'cyan'], [0.4, 'green'], [0.7, 'darkgreen'],[0.8, 'saddlebrown'], [0.9, 'white'],[1,"#E0FFFF"]],
                "Volcanic":[[0.0, '#ff0800'],[0.3, '#560319'],[0.4, '#65000b '], [0.5, '#a81c07 '], [0.6, '#321414  '],[0.7, 'brown'], [0.9, 'black'],[1,"#E0FFFF"]],
                "Oceanic":[[0.0, 'navy'],[0.5, 'blue'],[0.6, 'lightseagreen'], [0.75, 'cyan'], [0.8, 'green'], [0.9, 'white'],[1,"#E0FFFF"]],
@@ -322,6 +322,7 @@ config_globe = {'displayModeBar': True,
 
 col2.plotly_chart(planet_fig,config=config_globe)
 st.header('Planetary Map View')
+
 st.plotly_chart(planet_map)
 for x in planet_dict:
     col1.write (f"{x.title()}: {planet_dict[x]}")
@@ -332,8 +333,6 @@ with st.sidebar:
         planet_dict=newplanet()
     st.write("Welcome to the Planet Generator")
     st.write("-------------------------------")
-    st.write("This was written to create planets")
-    st.write("for a Sci-Fi Savage Worlds game.")
-    st.write("Scroll down to see a map view of the world,")
-    st.write("and you can use the image controls to save")
-    st.write("the images of the planet.")
+    st.write("This was written to create planets for a Savage Worlds game.")
+    st.write("Scroll down to see a map view of the world, and you can use the image controls to save images of the planet globe and map.  Be sure to set them to full screen before you capture them, especially the map.")
+
