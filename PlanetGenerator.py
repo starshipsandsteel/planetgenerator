@@ -95,7 +95,6 @@ def newplanet():
     suffix=random.choice(planet_suffixes)
     designation=random.choice(planet_numbers_designations)
 
-
     if planetnameswitch==0:
         planetname=prefix+root
     elif planetnameswitch==1:
@@ -127,16 +126,18 @@ def newplanet():
 
 def planet_graphics(type):
     # Parameters for random world generation
-    resolution = 300            # Higher resolution for smoothness
-    radius = 2.0                # Radius of the sphere
-    scale = 3.0                 # Controls continent size
+    resolution = 200            # Higher resolution for smoothness
+    radius = 1.0                # Radius of the sphere
+    base_scale = 3.0            # Base scale for continent size
     octaves = 4                 # Detail level
     persistence = 0.4           # Smooth terrain transitions
-    lacunarity = 2              # Frequency
+    lacunarity = 2.0            # Frequency
 
-    # Set random seed for reproducibility
-    #np.random.seed(np.random.randint(0, 1000))
-    np.random.seed(None)
+    # Randomize parameters for unique worlds
+    np.random.seed()  # Ensures randomness on each run
+    random_offset = np.random.uniform(-1000, 1000, size=3)  # Random offset for noise
+    scale_variation = np.random.uniform(0.8, 1.2)           # Random variation in scale
+    scale = base_scale * scale_variation
 
     # Generate spherical coordinates
     theta = np.linspace(0, 2 * np.pi, resolution)
@@ -149,13 +150,13 @@ def planet_graphics(type):
     z = radius * np.cos(phi_grid)
 
     # Apply Simplex noise for elevation
-    def generate_elevation(x, y, z):
+    def generate_elevation(x, y, z, offset):
         elevation = np.zeros_like(x)
         for i in range(resolution):
             for j in range(resolution):
-                nx = x[i, j] * scale
-                ny = y[i, j] * scale
-                nz = z[i, j] * scale
+                nx = (x[i, j] + offset[0]) * scale
+                ny = (y[i, j] + offset[1]) * scale
+                nz = (z[i, j] + offset[2]) * scale
                 elevation[i, j] = snoise3(
                     nx, ny, nz,
                     octaves=octaves,
@@ -165,7 +166,7 @@ def planet_graphics(type):
         return elevation
 
     # Generate elevation data
-    elevation = generate_elevation(x, y, z)
+    elevation = generate_elevation(x, y, z, random_offset)
     normalized_elevation = (elevation - elevation.min()) / (elevation.max() - elevation.min())
 
     # Apply elevation to create mountains and valleys
@@ -202,8 +203,8 @@ def planet_graphics(type):
 
     fig.update_layout(
     autosize=False,
-    width=500,
-    height=500,
+    width=800,
+    height=700,
     scene=dict(
         xaxis=dict(showbackground=False, visible=False),
         yaxis=dict(showbackground=False, visible=False),
@@ -228,16 +229,17 @@ st.markdown(
     </style>
     """, unsafe_allow_html=True
 )
-
 st.title("Planet Generator")
+col1, col2 = st.columns(2,vertical_alignment="top",border=True)
 planet_dict=newplanet()
 planet_fig=planet_graphics(planet_dict["type"])
-col1, col2 = st.columns(2,vertical_alignment="top",border=True)
+
+config = {'displayModeBar': False,
+          'use_container_width':False}
+col2.plotly_chart(planet_fig,config=config)
+
 for x in planet_dict:
     col1.write (f"{x.title()}: {planet_dict[x]}")
-
-
-col2.plotly_chart(planet_fig,use_container_width=False)
 
 with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
