@@ -318,7 +318,7 @@ st.markdown(
     </style>
     """, unsafe_allow_html=True
 )
-st.title("Galactic Catrographers")
+st.title("Galactic Cartographers")
 
 
 planet_dict=newplanet()
