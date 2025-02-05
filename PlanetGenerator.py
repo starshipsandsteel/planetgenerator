@@ -205,16 +205,37 @@ def planet_graphics(type,caps,size):
     # Blend ice cap gradient with terrain
     combined_terrain = np.maximum(normalized_elevation, ice_cap_gradient)
 
+    # get POI range per type
+    poirange={"Oceanic":[0.8,.9],"Desert":[0.1,.9],"Volcanic":[0.6,.9],"Frozen":[0.1,.9],"Rocky":[0,.9],"Crystal":[0,.9],"Jungle":[0.4,.9]}
+    lower=poirange[type][0]
+    upper=poirange[type][1]
+    # Add Points of Interest (POIs)
+    poi_indices = np.argwhere((combined_terrain > lower) & (combined_terrain< upper))
+    rng = np.random.default_rng()
+    poinumber=rng.integers(5)+1
+    selected_pois = poi_indices[np.random.choice(poi_indices.shape[0], size=poinumber, replace=False)]  # Select 5 random POIs
+
+    # Extract coordinates for POIs
+    #poi_x = x_distorted[selected_pois[:, 0], selected_pois[:, 1]]
+    #poi_y = y_distorted[selected_pois[:, 0], selected_pois[:, 1]]
+    #poi_z = z_distorted[selected_pois[:, 0], selected_pois[:, 1]]
+    poi_lat = latitude[selected_pois[:, 0], selected_pois[:, 1]]
+    poi_lon = np.degrees(theta_grid[selected_pois[:, 0], selected_pois[:, 1]]) - 180
+
     # Color scale for terrain
     colortype={"Desert":[[0.0,'cyan'],[0.1,"#c4830d"],[0.5,"#aa6d04"],[0.7,"#835204"],[0.95,"#643c04"],[1,"#E0FFFF"]],
                "Jungle":[[0.0, 'blue'],[0.3, 'cyan'], [0.4, 'green'], [0.7, 'darkgreen'],[0.8, 'saddlebrown'], [0.95, 'white'],[1,"#E0FFFF"]],
-               "Volcanic":[[0.0, '#ff0800'],[0.2, '#560319'],[0.3, '#65000b '], [0.35, '#a81c07 '], [0.6, '#321414  '],[0.7, 'brown'], [0.95, 'black'],[1,"#E0FFFF"]],
+               "Volcanic":[[0.0, '#ff0800'],[0.2, '#560319'],[0.3, '#65000b '], [0.35, '#a81c07'], [0.6, '#321414'],[0.7, 'brown'], [0.95, 'black'],[1,"#E0FFFF"]],
                "Oceanic":[[0.0, 'navy'],[0.5, 'blue'],[0.6, '#3c99dc'], [0.75, 'cyan'], [0.8, 'green'], [0.95, 'white'],[1,"#E0FFFF"]],
                "Frozen":[[0.0, 'cyan'],[0.4, '#B4ECFF'], [0.5, '#C7E9F5'], [0.5, '#eab676'], [0.65, '#FFFFFF'], [0.9, 'white'],[1,"#E0FFFF"]],
                "Rocky":[[0.0, '#483104'],[0.4, '#674606'], [0.5, '#3F2B05'], [0.85, '#865b0b '], [0.98, 'white'],[1,"#E0FFFF"]],
                "Crystal":[[0.0, '#C54F9E'],[0.4, '#BF3893'], [0.5, '#6B2E57'], [0.7, '#CECB24'], [0.95, 'white'],[1,"#E0FFFF"]],
                }
     colorscale=colortype[type]
+    if type=="Volcanic":
+        dotcolor="black"
+    else:
+        dotcolor="red"
 
     # Create the globe plot
     fig = go.Figure(data=[
@@ -225,7 +246,7 @@ def planet_graphics(type,caps,size):
             surfacecolor=combined_terrain,
             colorscale=colorscale,
             cmin=0,
-            cmax=1,
+            cmax=1,  # Adjusted to fit color range
             showscale=False,
             opacity=1.0
         )
@@ -261,6 +282,13 @@ def planet_graphics(type,caps,size):
             zmin=0,
             zmax=1,
             showscale=False
+        ),
+        go.Scatter(
+            x=poi_lon,
+            y=poi_lat,
+            mode='markers',
+            marker=dict(size=10, color=dotcolor, symbol='octagon'),
+            name='Points of Interest'
         )
     ])
 
@@ -276,8 +304,42 @@ def planet_graphics(type,caps,size):
         width=1800,
     )
 
-    return fig,fig_flat
+    return fig,fig_flat,poinumber
 
+# Random name generator for POIs
+def generate_poi_name(poi_type):
+    natural_prefixes = ["Whispering", "Emerald", "Silent", "Crimson", "Frozen", "Golden"]
+    natural_suffixes = [
+        "Forest", "Lake", "Cliffs", "Canyon", "Springs", "Glade",
+        "Meadow", "Valley", "Ridge", "Grove", "Bay", "Marsh", "Dunes", "Plateau"
+    ]
+
+    manmade_prefixes = ["Ancient", "Lost", "Mystic", "Hidden", "Crystal", "Dark"]
+    manmade_suffixes = [
+        "Fortress", "Ruins", "Citadel", "Temple", "Outpost", "Sanctuary",
+        "Tower", "Keep", "Bastion", "Monastery", "Stronghold", "Observatory", "Vault", "Shrine"
+    ]
+
+    if poi_type == "Natural":
+        return f"{random.choice(natural_prefixes)} {random.choice(natural_suffixes)}"
+    else:
+        return f"{random.choice(manmade_prefixes)} {random.choice(manmade_suffixes)}"
+
+# Generate Points of Interest (POIs)
+def generate_pois(num_pois):
+
+    # Create POI data with types
+    poi_types = ["Natural", "Man-made"]
+    pois = []
+    for x in range(0,num_pois):
+        poi_type = random.choice(poi_types)
+        name = generate_poi_name(poi_type)
+        pois.append({
+            "name": name,
+            "type": poi_type
+        })
+
+    return pois
 
 st.markdown(
     """
@@ -327,7 +389,7 @@ col1, col2 = st.columns(2,vertical_alignment="top",border=True)
 for x in planet_dict:
     if x!="name":
         col1.write (f"{x.title()}: {planet_dict[x]}")
-planet_fig,planet_map=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
+planet_fig,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
 
 
 config_globe = {'displayModeBar': True,
@@ -337,6 +399,10 @@ col2.plotly_chart(planet_fig,config=config_globe)
 st.header('Planetary Map View')
 
 st.plotly_chart(planet_map)
+st.write("Points of Interest")
+poidict=generate_pois(pois)
+for x in range(0,pois):
+    st.write(f"{x+1}: {poidict[x]['name']} ({poidict[x]['type']})")
 
 
 with st.sidebar:
@@ -345,6 +411,6 @@ with st.sidebar:
         planet_dict=newplanet()
     st.write("Welcome to the Department of Galactic Cartography, an online catalog of nearly limitless worlds, surveyed or not.")
     st.write("-------------------------------")
-    st.write("This was written to create planets for a Savage Worlds game.")
+    st.write("This was written to create planets for a Savage Worlds game, but with the idea of it being 100% system agnostic.")
     st.write("Scroll down to see a map view of the world, and you can use the image controls to save images of the planet globe and map.  Be sure to set them to full screen before you capture them, especially the map.")
 
