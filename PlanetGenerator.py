@@ -199,7 +199,7 @@ def planet_graphics(type,caps,size):
     ice_threshold = ice                 # Base latitude for ice caps
 
     # Apply noise and create a smooth gradient using a sigmoid function
-    dice_transition = (np.abs(latitude) + (ice_noise * 5) - ice_threshold) / 5  # Smoother transition
+    dice_transition = (np.abs(latitude) + (ice_noise * 2) - ice_threshold) / 5  # Smoother transition
     ice_cap_gradient = 1 / (1 + np.exp(-dice_transition))                      # Sigmoid smoothing
 
     # Blend ice cap gradient with terrain
@@ -214,6 +214,9 @@ def planet_graphics(type,caps,size):
     rng = np.random.default_rng()
     poinumber=rng.integers(5)+1
     selected_pois = poi_indices[np.random.choice(poi_indices.shape[0], size=poinumber, replace=False)]  # Select 5 random POIs
+    textpoints=[]
+    for x in range(1,poinumber+1):
+        textpoints.append(str(x))
 
     # Extract coordinates for POIs
     #poi_x = x_distorted[selected_pois[:, 0], selected_pois[:, 1]]
@@ -273,7 +276,7 @@ def planet_graphics(type,caps,size):
     longitude = np.degrees(theta_grid) - 180  # Longitude from -180 to 180
     latitude = 90 - np.degrees(phi_grid)      # Latitude from -90 to 90
 
-    fig_flat = go.Figure(data=[
+    fig_flat_poi = go.Figure(data=[
         go.Heatmap(
             z=combined_terrain,
             x=longitude[0],
@@ -286,25 +289,44 @@ def planet_graphics(type,caps,size):
         go.Scatter(
             x=poi_lon,
             y=poi_lat,
-            mode='markers',
-            marker=dict(size=10, color=dotcolor, symbol='octagon'),
+            mode='markers+text',
+            text=textpoints,
+            marker=dict(size=20, color=dotcolor, symbol='octagon'),
             name='Points of Interest'
         )
     ])
+    fig_flat = go.Figure(data=[
+        go.Heatmap(
+            z=combined_terrain,
+            x=longitude[0],
+            y=latitude[:, 0],
+            colorscale=colorscale,
+            zmin=0,
+            zmax=1,
+            showscale=False
+        )
+    ])
 
-    fig_flat.update_layout(
-        #title='Flat Map Projection (Equirectangular)',
-        #xaxis=dict(title='Longitude', showgrid=False, zeroline=False),
-        #yaxis=dict(title='Latitude', showgrid=False, zeroline=False),
+
+
+    fig_flat_poi.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
         template='plotly_dark',
         xaxis=dict(visible=False),
         yaxis=dict(visible=False),
         plot_bgcolor='black',
-        width=1800,
+        width=1800
+    )
+    fig_flat.update_layout(
+        paper_bgcolor='rgba(0,0,0,0)',
+        template='plotly_dark',
+        xaxis=dict(visible=False),
+        yaxis=dict(visible=False),
+        plot_bgcolor='black',
+        width=1800
     )
 
-    return fig,fig_flat,poinumber
+    return fig,fig_flat_poi,fig_flat,poinumber
 
 # Random name generator for POIs
 def generate_poi_name(poi_type):
@@ -380,37 +402,54 @@ st.markdown(
     </style>
     """, unsafe_allow_html=True
 )
+
 st.title("Galactic Cartographers")
 
-
 planet_dict=newplanet()
-st.header(f'Planetary Overview: {planet_dict["name"]}')
-col1, col2 = st.columns(2,vertical_alignment="top",border=True)
-for x in planet_dict:
-    if x!="name":
-        col1.write (f"{x.title()}: {planet_dict[x]}")
-planet_fig,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
 
+st.header(f'{planet_dict["name"]}')
 
 config_globe = {'displayModeBar': True,
-          'use_container_width':False}
+        'use_container_width':False}
+planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
 
+col1, col2 = st.columns(2,vertical_alignment="top",border=True)
 col2.plotly_chart(planet_fig,config=config_globe)
-st.header('Planetary Map View')
 
-st.plotly_chart(planet_map)
-st.write("Points of Interest")
 poidict=generate_pois(pois)
-for x in range(0,pois):
-    st.write(f"{x+1}: {poidict[x]['name']} ({poidict[x]['type']})")
-
 
 with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
     if(st.button("Retrieve New World")):
         planet_dict=newplanet()
+
+    st.header(f'Planetary Overview: {planet_dict["name"]}')
+
+    config_globe = {'displayModeBar': True,
+            'use_container_width':False}
+    planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
+
+
+
+    for x in planet_dict:
+        if x!="name":
+            col1.write (f"{x.title()}: {planet_dict[x]}")
+    poidict=generate_pois(pois)
+
     st.write("Welcome to the Department of Galactic Cartography, an online catalog of nearly limitless worlds, surveyed or not.")
     st.write("-------------------------------")
     st.write("This was written to create planets for a Savage Worlds game, but with the idea of it being 100% system agnostic.")
     st.write("Scroll down to see a map view of the world, and you can use the image controls to save images of the planet globe and map.  Be sure to set them to full screen before you capture them, especially the map.")
+    st.write("Below the planetary map, is a second map displaying planetary sites to be explored.")
+st.header('Planetary Map View')
+st.plotly_chart(planet_map)
+
+st.header('Planetary Sites View')
+st.plotly_chart(planet_map_poi)
+st.write("Planetary Sites")
+for x in range(0,pois):
+    st.write(f"{x+1}: {poidict[x]['name']} ({poidict[x]['type']})")
+
+
+
 
