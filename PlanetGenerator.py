@@ -421,16 +421,11 @@ poidict=generate_pois(pois)
 with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
     if(st.button("Retrieve New World")):
-        planet_dict=newplanet()
-        config_globe = {'displayModeBar': True,
-        'use_container_width':False}
-        planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
+        print("new world")
+        #planet_dict=newplanet()
+        #planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
 
     st.header(f'Planetary Overview: {planet_dict["name"]}')
-
-
-
-
 
     for x in planet_dict:
         if x!="name":
