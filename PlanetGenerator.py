@@ -435,7 +435,6 @@ col1, col2 = st.columns(2,vertical_alignment="top",border=True)
 with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
     if(st.button("Retrieve New World")):
-        print("new world")
         planet_dict=newplanet()
         planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
         poidict=generate_pois(pois)
