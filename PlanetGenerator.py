@@ -6,12 +6,12 @@ import plotly.graph_objects as go
 import numpy as np
 from noise import snoise3
 
-def newplanet():
+def newplanet(selectedtype):
     planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal"]
     planetsize=["Dwarf","Small","Small","Medium","Medium","Medium","Large","Giant","Gas Giant Moon"]
     planetfeatures=["Massive Canyon System","Towering Spires","Unique Weather Phenomenon","Massive Sinkholes","Titanic Geysers",
                     "Craters","Colossal Fossils", "Hostile Life: Flora","Hostile Life: Fauna"]
-    planetmood=["Vibrant and Lush","Dark and Gritty","Mysterious and Eerie","Ancient and Weathered","Pristine and Serene"]
+    #planetmood=["Vibrant and Lush","Dark and Gritty","Mysterious and Eerie","Ancient and Weathered","Pristine and Serene"]
     planetsettlements=["None","Sparse","Scattered","Dense"]
     planetsettlmentsize=["Outposts","Colony","Towns","Cities","Metropolis"]
     planetdevelopment=["Low","Low","Medium","Medium","High"]
@@ -56,7 +56,10 @@ def newplanet():
     gravitymod={"Dwarf":0.75,"Small":0.85,"Medium":1,"Large":1.3,"Giant":2,"Gas Giant Moon":0.75}
     daymod={"Dwarf":-5,"Small":-3,"Medium":0,"Large":2,"Giant":4,"Gas Giant Moon":0}
 
-    type=random.choice(planettype)
+    if selectedtype=="Any":
+        type=random.choice(planettype)
+    else:
+        type=selectedtype
     size=random.choice(planetsize)
     numfeat=random.randint(1,4)
     features=random.sample(planetfeatures,numfeat)
@@ -406,7 +409,7 @@ st.title("Galactic Cartographers")
 # Generate initial planet if init was not stored in session state
 # if init exists in session state do not run this code.
 if "init" not in st.session_state:
-    planet_dict=newplanet()
+    planet_dict=newplanet("Any")
     planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
     poidict=generate_pois(pois)
 
@@ -434,8 +437,11 @@ col1, col2 = st.columns(2,vertical_alignment="top",border=True)
 
 with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
+
+
+    planettype=st.selectbox("Planet Type to Retrieve",("Any","Desert","Jungle","Rocky","Crystal","Frozen","Volcanic"),)
     if(st.button("Retrieve New World")):
-        planet_dict=newplanet()
+        planet_dict=newplanet(planettype)
         planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
         poidict=generate_pois(pois)
         st.session_state["poimap"]=planet_map_poi
@@ -449,7 +455,8 @@ with st.sidebar:
     st.write("Welcome to the Department of Galactic Cartography, an online catalog of nearly limitless worlds, surveyed or not.")
     st.write("-------------------------------")
     st.write("This was written to create planets for a Savage Worlds game, but with the idea of it being 100% system agnostic.")
-    st.write("Scroll down to see a map view of the world, and you can use the image controls to save images of the planet globe and map.  Be sure to set them to full screen before you capture them, especially the map.")
+    st.write("Scroll down to see a map view of the world, and you can use the image controls to save images of the planet globe and map.") 
+    st.write("Be sure to set them to full screen before you capture them, especially the map.")
     st.write("Below the planetary map, is a second map displaying planetary sites to be explored.")
 for x in st.session_state["planet_dict"]:
     if x!="name":
