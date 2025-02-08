@@ -307,8 +307,6 @@ def planet_graphics(type,caps,size):
         )
     ])
 
-
-
     fig_flat_poi.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
         template='plotly_dark',
@@ -349,7 +347,6 @@ def generate_poi_name(poi_type):
 
 # Generate Points of Interest (POIs)
 def generate_pois(num_pois):
-
     # Create POI data with types
     poi_types = ["Natural", "Man-made"]
     pois = []
@@ -403,48 +400,72 @@ st.markdown(
     """, unsafe_allow_html=True
 )
 
+# Set app title
 st.title("Galactic Cartographers")
 
-planet_dict=newplanet()
+# Generate initial planet if init was not stored in session state
+# if init exists in session state do not run this code.
+if "init" not in st.session_state:
+    planet_dict=newplanet()
+    planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
+    poidict=generate_pois(pois)
 
-st.header(f'{planet_dict["name"]}')
+# Store initial planet in session states
+if "init" not in st.session_state:
+    st.session_state["init"]=1
+if "poimap" not in st.session_state:
+    st.session_state["poimap"]=planet_map_poi
+if "map" not in st.session_state:
+    st.session_state["map"]=planet_map
+if "planet_fig" not in st.session_state:
+    st.session_state["planet_fig"]=planet_fig
+if "planet_dict" not in st.session_state:
+    st.session_state["planet_dict"]=planet_dict
+if "planet_poi" not in st.session_state:
+    st.session_state["planet_poi"]=poidict
+
+st.header(st.session_state['planet_dict']['name'])
 
 config_globe = {'displayModeBar': True,
         'use_container_width':False}
-planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
 
 col1, col2 = st.columns(2,vertical_alignment="top",border=True)
-col2.plotly_chart(planet_fig,config=config_globe)
 
-poidict=generate_pois(pois)
 
 with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
     if(st.button("Retrieve New World")):
         print("new world")
-        #planet_dict=newplanet()
-        #planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
-
-    st.header(f'Planetary Overview: {planet_dict["name"]}')
-
-    for x in planet_dict:
-        if x!="name":
-            col1.write (f"{x.title()}: {planet_dict[x]}")
-    poidict=generate_pois(pois)
+        planet_dict=newplanet()
+        planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
+        poidict=generate_pois(pois)
+        st.session_state["poimap"]=planet_map_poi
+        st.session_state["map"]=planet_map
+        st.session_state["planet_fig"]=planet_fig
+        st.session_state["planet_dict"]=planet_dict
+        st.session_state["planet_poi"]=poidict
+    
+    poi_onoff=st.toggle("Show POIs")
 
     st.write("Welcome to the Department of Galactic Cartography, an online catalog of nearly limitless worlds, surveyed or not.")
     st.write("-------------------------------")
     st.write("This was written to create planets for a Savage Worlds game, but with the idea of it being 100% system agnostic.")
     st.write("Scroll down to see a map view of the world, and you can use the image controls to save images of the planet globe and map.  Be sure to set them to full screen before you capture them, especially the map.")
     st.write("Below the planetary map, is a second map displaying planetary sites to be explored.")
+for x in st.session_state["planet_dict"]:
+    if x!="name":
+        col1.write (f"{x.title()}: {st.session_state['planet_dict'][x]}")
+col2.plotly_chart(st.session_state["planet_fig"],config=config_globe)
 st.header('Planetary Map View')
-st.plotly_chart(planet_map)
+if poi_onoff:
+    st.plotly_chart(st.session_state["poimap"])
+else:
+    st.plotly_chart(st.session_state["map"])
+#st.header('Planetary Sites View')
 
-st.header('Planetary Sites View')
-st.plotly_chart(planet_map_poi)
 st.write("Planetary Sites")
-for x in range(0,pois):
-    st.write(f"{x+1}: {poidict[x]['name']} ({poidict[x]['type']})")
+for x in range(0,len(st.session_state["planet_poi"])):
+    st.write(f"{x+1}: {st.session_state['planet_poi'][x]['name']} ({st.session_state['planet_poi'][x]['type']})")
 
 
 
