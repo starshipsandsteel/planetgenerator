@@ -216,9 +216,10 @@ def planet_graphics(type,caps,size):
     lower=poirange[type][0]
     upper=poirange[type][1]
     # Add Points of Interest (POIs)
+    poimax={"Dwarf":3,"Small":4,"Medium":5,"Large":7,"Giant":10,"Gas Giant Moon":2}
     poi_indices = np.argwhere((combined_terrain > lower) & (combined_terrain< upper))
     rng = np.random.default_rng()
-    poinumber=rng.integers(5)+1
+    poinumber=rng.integers(poimax[size])+1
     selected_pois = poi_indices[np.random.choice(poi_indices.shape[0], size=poinumber, replace=False)]  # Select 5 random POIs
     textpoints=[]
     for x in range(1,poinumber+1):
@@ -277,7 +278,6 @@ def planet_graphics(type,caps,size):
         bgcolor='black'
         )
     )
-
 
     # === Flat 2:1 Map Projection ===
     longitude = np.degrees(theta_grid) - 180  # Longitude from -180 to 180
