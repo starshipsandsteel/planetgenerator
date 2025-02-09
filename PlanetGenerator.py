@@ -436,7 +436,7 @@ if "planet_poi" not in st.session_state:
 
 with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
-    planettype=st.selectbox("Planet Type to Retrieve",("Any","Desert","Jungle","Rocky","Crystal","Frozen","Volcanic","Steppe"),)
+    planettype=st.selectbox("Planet Type to Retrieve",("Any","Desert","Jungle","Rocky","Oceanic","Crystal","Frozen","Volcanic","Steppe"),)
     planetsize=st.selectbox("Planet Size to Retrieve",("Any","Gas Giant Moon","Dwarf","Small","Medium","Large","Giant"),)
     if(st.button("Retrieve New World")):
         planet_dict=newplanet(planettype,planetsize)
@@ -447,7 +447,6 @@ with st.sidebar:
         st.session_state["planet_fig"]=planet_fig
         st.session_state["planet_dict"]=planet_dict
         st.session_state["planet_poi"]=poidict
-        print(st.session_state["planet_dict"]["name"])
     poi_onoff=st.toggle("Show POIs")
 
     st.write("Welcome to the Department of Galactic Cartography, an online catalog of nearly limitless worlds, surveyed or not.")
@@ -459,7 +458,6 @@ with st.sidebar:
     #st.write("-------------------------------")
     #st.image("https://i.imgur.com/kv7vuDb.png")
 
-print("Update title")
 st.header(st.session_state['planet_dict']['name'])
 
 config_globe = {'displayModeBar': True,
