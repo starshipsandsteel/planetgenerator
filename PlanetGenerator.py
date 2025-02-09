@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 import numpy as np
 from noise import snoise3
 
-def newplanet(selectedtype):
+def newplanet(selectedtype,selectedsize):
     planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal","Steppe"]
     planetsize=["Dwarf","Small","Small","Medium","Medium","Medium","Large","Giant","Gas Giant Moon"]
     planetfeatures=["Massive Canyon System","Towering Spires","Unique Weather Phenomenon","Massive Sinkholes","Titanic Geysers",
@@ -60,7 +60,10 @@ def newplanet(selectedtype):
         type=random.choice(planettype)
     else:
         type=selectedtype
-    size=random.choice(planetsize)
+    if selectedsize=="Any":
+        size=random.choice(planetsize)
+    else:
+        size=selectedsize
     numfeat=random.randint(1,4)
     features=random.sample(planetfeatures,numfeat)
     featurelist=", ".join(features)
@@ -410,7 +413,7 @@ st.title("Galactic Cartographers")
 # Generate initial planet if init was not stored in session state
 # if init exists in session state do not run this code.
 if "init" not in st.session_state:
-    planet_dict=newplanet("Any")
+    planet_dict=newplanet("Any","Any")
     planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
     poidict=generate_pois(pois)
 
@@ -434,8 +437,9 @@ if "planet_poi" not in st.session_state:
 with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
     planettype=st.selectbox("Planet Type to Retrieve",("Any","Desert","Jungle","Rocky","Crystal","Frozen","Volcanic","Steppe"),)
+    planetsize=st.selectbox("Planet Size to Retrieve",("Any","Gas Giant Moon","Dwarf","Small","Medium","Large","Giant"),)
     if(st.button("Retrieve New World")):
-        planet_dict=newplanet(planettype)
+        planet_dict=newplanet(planettype,planetsize)
         planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
         poidict=generate_pois(pois)
         st.session_state["poimap"]=planet_map_poi
