@@ -7,7 +7,7 @@ import numpy as np
 from noise import snoise3
 
 def newplanet(selectedtype):
-    planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal"]
+    planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal","Steppe"]
     planetsize=["Dwarf","Small","Small","Medium","Medium","Medium","Large","Giant","Gas Giant Moon"]
     planetfeatures=["Massive Canyon System","Towering Spires","Unique Weather Phenomenon","Massive Sinkholes","Titanic Geysers",
                     "Craters","Colossal Fossils", "Hostile Life: Flora","Hostile Life: Fauna"]
@@ -51,8 +51,8 @@ def newplanet(selectedtype):
     ]
 
     tempmodifier={"Close":10,"Medium":0,"Far":-10,"Extreme":-20}
-    typetempmodifier={"Desert":20,"Jungle":20,"Oceanic":0,"Volcanic":10,"Frozen":-50,"Rocky":0,"Crystal":0,"Earth-like":0}
-    basetemp={"Desert":20,"Jungle":20,"Oceanic":15,"Volcanic":10,"Frozen":-10,"Rocky":0,"Gas Giant w/ Moons":0,"Crystal":0,"Earth-like":20}
+    typetempmodifier={"Desert":20,"Jungle":20,"Oceanic":0,"Volcanic":10,"Frozen":-50,"Rocky":0,"Crystal":0,"Steppe":0}
+    basetemp={"Desert":20,"Jungle":20,"Oceanic":15,"Volcanic":10,"Frozen":-10,"Rocky":0,"Gas Giant w/ Moons":0,"Crystal":0,"Steppe":20}
     gravitymod={"Dwarf":0.75,"Small":0.85,"Medium":1,"Large":1.3,"Giant":2,"Gas Giant Moon":0.75}
     daymod={"Dwarf":-5,"Small":-3,"Medium":0,"Large":2,"Giant":4,"Gas Giant Moon":0}
 
@@ -194,7 +194,7 @@ def planet_graphics(type,caps,size):
                 octaves=2, persistence=0.5, lacunarity=2.0
             )
     # ice dictionary
-    icethresh={"None":90,"Small":80,"Medium":70,"Large":65}
+    icethresh={"None":90,"Small":75,"Medium":65,"Large":60}
     ice=icethresh[caps]
 
     # Ice cap mask with smooth, noisy edges
@@ -209,7 +209,7 @@ def planet_graphics(type,caps,size):
     combined_terrain = np.maximum(normalized_elevation, ice_cap_gradient)
 
     # get POI range per type
-    poirange={"Oceanic":[0.8,.9],"Desert":[0.1,.9],"Volcanic":[0.6,.9],"Frozen":[0.1,.9],"Rocky":[0,.9],"Crystal":[0,.9],"Jungle":[0.4,.9]}
+    poirange={"Oceanic":[0.8,.9],"Desert":[0.1,.9],"Volcanic":[0.6,.9],"Frozen":[0.1,.9],"Rocky":[0,.9],"Crystal":[0,.9],"Jungle":[0.4,.9],"Steppe":[0.4,.9]}
     lower=poirange[type][0]
     upper=poirange[type][1]
     # Add Points of Interest (POIs)
@@ -236,6 +236,7 @@ def planet_graphics(type,caps,size):
                "Frozen":[[0.0, 'cyan'],[0.4, '#B4ECFF'], [0.5, '#C7E9F5'], [0.5, '#eab676'], [0.65, '#FFFFFF'], [0.9, 'white'],[1,"#E0FFFF"]],
                "Rocky":[[0.0, '#483104'],[0.4, '#674606'], [0.5, '#3F2B05'], [0.85, '#865b0b '], [0.98, 'white'],[1,"#E0FFFF"]],
                "Crystal":[[0.0, '#C54F9E'],[0.4, '#BF3893'], [0.5, '#6B2E57'], [0.7, '#CECB24'], [0.95, 'white'],[1,"#E0FFFF"]],
+               "Steppe":[[0.0, 'blue'],[0.2, 'cyan'], [0.35, '#fff59d'], [0.5, '#dce775'],[0.6, '#8bc34a'],[0.7, '#f3bc77'],[0.9, '#402a23'], [0.95, 'white'],[1,"#E0FFFF"]],
                }
     colorscale=colortype[type]
     if type=="Volcanic":
@@ -424,22 +425,15 @@ if "planet_fig" not in st.session_state:
     st.session_state["planet_fig"]=planet_fig
 if "planet_dict" not in st.session_state:
     st.session_state["planet_dict"]=planet_dict
+    print("Added to Session State")
 if "planet_poi" not in st.session_state:
     st.session_state["planet_poi"]=poidict
 
-st.header(st.session_state['planet_dict']['name'])
-
-config_globe = {'displayModeBar': True,
-        'use_container_width':False}
-
-col1, col2 = st.columns(2,vertical_alignment="top",border=True)
 
 
 with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
-
-
-    planettype=st.selectbox("Planet Type to Retrieve",("Any","Desert","Jungle","Rocky","Crystal","Frozen","Volcanic"),)
+    planettype=st.selectbox("Planet Type to Retrieve",("Any","Desert","Jungle","Rocky","Crystal","Frozen","Volcanic","Steppe"),)
     if(st.button("Retrieve New World")):
         planet_dict=newplanet(planettype)
         planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
@@ -449,7 +443,7 @@ with st.sidebar:
         st.session_state["planet_fig"]=planet_fig
         st.session_state["planet_dict"]=planet_dict
         st.session_state["planet_poi"]=poidict
-    
+        print(st.session_state["planet_dict"]["name"])
     poi_onoff=st.toggle("Show POIs")
 
     st.write("Welcome to the Department of Galactic Cartography, an online catalog of nearly limitless worlds, surveyed or not.")
@@ -458,6 +452,17 @@ with st.sidebar:
     st.write("Scroll down to see a map view of the world, and you can use the image controls to save images of the planet globe and map.") 
     st.write("Be sure to set them to full screen before you capture them, especially the map.")
     st.write("Below the planetary map, is a second map displaying planetary sites to be explored.")
+    #st.write("-------------------------------")
+    #st.image("https://i.imgur.com/kv7vuDb.png")
+
+print("Update title")
+st.header(st.session_state['planet_dict']['name'])
+
+config_globe = {'displayModeBar': True,
+        'use_container_width':False}
+
+col1, col2 = st.columns(2,vertical_alignment="top",border=True)
+
 for x in st.session_state["planet_dict"]:
     if x!="name":
         col1.write (f"{x.title()}: {st.session_state['planet_dict'][x]}")
