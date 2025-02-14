@@ -8,11 +8,12 @@ import pandas as pd
 from noise import snoise3
 import os
 
-def newplanet(planetdb,selectedtype,selectedsize,planetseed=0):
+def newplanet(planetdb,selectedtype="Any",selectedsize="Any",planetseed=0):
     
     if planetseed==0 or planetseed is None or planetseed=="":
         random_data = os.urandom(8)
-        seed = int.from_bytes(random_data, byteorder="big")
+        seed = int(int.from_bytes(random_data, byteorder="big")/1000000000000)
+        seed=f"svrn-{seed}"
         random.seed(str(seed))
 
     else:
@@ -60,7 +61,8 @@ def newplanet(planetdb,selectedtype,selectedsize,planetseed=0):
         "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", 
         "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", 
         "A", "B", "C", "D", "E", "X", "Y", "Z", "Alpha", "Beta", 
-        "Gamma", "Delta", "Epsilon", "Prime", "Omega", "Sigma", "Kappa", "Rho", "Phi", "Tau"
+        "Gamma", "Delta", "Epsilon", "Prime", "Omega", "Sigma", "Kappa", "Rho", "Phi", "Tau",
+        "Noh","Rah","Tev","Kri","Voh","Lah","Zin","Sha","Tor","Fyn"
     ]
 
     tempmodifier={"Close":10,"Medium":0,"Far":-10,"Extreme":-20}
@@ -93,7 +95,7 @@ def newplanet(planetdb,selectedtype,selectedsize,planetseed=0):
         settlementsize="N/A"
         law="N/A"
         development="N/A"
-        price="N/A"
+        price="-999"
 
     planetatmochoice=random.choice(planetatmosphere)   
     if type=="Oceanic" or type=="Jungle":
@@ -152,7 +154,7 @@ def newplanet(planetdb,selectedtype,selectedsize,planetseed=0):
     tempplanetdb=pd.DataFrame(planet_dict,index=[0])
 
     planetdb=pd.concat([planetdb,tempplanetdb])
-    
+    planetdb=planetdb.drop_duplicates(subset=["record id"],keep="last")
     ##PLANETDB add row
     return planet_dict,planetdb
 
@@ -395,6 +397,9 @@ def generate_pois(num_pois):
         })
 
     return pois
+def convert_df_to_csv(df):
+  # IMPORTANT: Cache the conversion to prevent computation on every rerun
+  return df.to_csv().encode('utf-8')
 
 st.markdown(
     """
@@ -443,7 +448,7 @@ st.title("Galactic Cartographers")
 # if init exists in session state do not run this code.
 if "init" not in st.session_state:
     # planetdb holds a record of all planets that have been created in a session as well as the randomseed used to generate graphics.
-    planetdb=pd.DataFrame(columns=["type","size","features","icecaps","settlement size","settlements","development","law",
+    planetdb=pd.DataFrame(columns=["name","type","size","features","icecaps","settlement size","settlements","development","law",
                                 "price modifier","distance to star","avg temperature (c)","atmosphere","atomosphere notes",
                                 "gravity","hours in day","graphicseed","record id"])
     planet_dict,st.session_state['planetdb']=newplanet(planetdb,"Any","Any",0)
@@ -503,17 +508,24 @@ for x in st.session_state["planet_dict"]:
     if x!="name" and x!="graphicseed":
         col1.write (f"{x.title()}: {st.session_state['planet_dict'][x]}")
 col2.plotly_chart(st.session_state["planet_fig"],config=config_globe)
-st.header('Planetary Map View')
+st.write('## Planetary Map View')
 if poi_onoff:
     st.plotly_chart(st.session_state["poimap"])
 else:
     st.plotly_chart(st.session_state["map"])
 #st.header('Planetary Sites View')
 
-st.write("Planetary Sites")
+st.write("## Planetary Sites")
 for x in range(0,len(st.session_state["planet_poi"])):
     st.write(f"{x+1}: {st.session_state['planet_poi'][x]['name']} ({st.session_state['planet_poi'][x]['type']})")
+st.write("---")
+st.write("## Previously Viewed")
+st.dataframe(st.session_state['planetdb'])
 
-
-
+st.download_button(
+  label="Download Planetary Records",
+  data=convert_df_to_csv(st.session_state['planetdb']),
+  file_name='planets.csv',
+  mime='text/csv',
+)
 
