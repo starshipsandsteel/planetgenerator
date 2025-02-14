@@ -497,32 +497,37 @@ with st.sidebar:
     #st.write("-------------------------------")
     #st.image("https://i.imgur.com/kv7vuDb.png")
 
-st.header(st.session_state['planet_dict']['name'])
+
+tab1,tab2=st.tabs(["Planet Readout","Previous Exploration"])
+
+tab1.header(st.session_state['planet_dict']['name'])
 
 config_globe = {'displayModeBar': True,
         'use_container_width':False}
 
-col1, col2 = st.columns(2,vertical_alignment="top",border=True)
-
-for x in st.session_state["planet_dict"]:
-    if x!="name" and x!="graphicseed":
-        col1.write (f"{x.title()}: {st.session_state['planet_dict'][x]}")
-col2.plotly_chart(st.session_state["planet_fig"],config=config_globe)
-st.write('## Planetary Map View')
+with tab1:
+    col1, col2 = st.columns(2,vertical_alignment="top",border=True)
+    for x in st.session_state["planet_dict"]:
+        if x!="name" and x!="graphicseed":
+                with col1:
+                    st.write (f"{x.title()}: {st.session_state['planet_dict'][x]}")
+    with col2:
+        col2.plotly_chart(st.session_state["planet_fig"],config=config_globe)
+tab1.write('## Planetary Map View')
 if poi_onoff:
-    st.plotly_chart(st.session_state["poimap"])
+    tab1.plotly_chart(st.session_state["poimap"])
 else:
-    st.plotly_chart(st.session_state["map"])
+    tab1.plotly_chart(st.session_state["map"])
 #st.header('Planetary Sites View')
 
-st.write("## Planetary Sites")
+tab1.write("## Planetary Sites")
 for x in range(0,len(st.session_state["planet_poi"])):
-    st.write(f"{x+1}: {st.session_state['planet_poi'][x]['name']} ({st.session_state['planet_poi'][x]['type']})")
-st.write("---")
-st.write("## Previously Viewed")
-st.dataframe(st.session_state['planetdb'])
+    tab1.write(f"{x+1}: {st.session_state['planet_poi'][x]['name']} ({st.session_state['planet_poi'][x]['type']})")
 
-st.download_button(
+tab2.write("## Previously Viewed")
+tab2.dataframe(st.session_state['planetdb'])
+
+tab2.download_button(
   label="Download Planetary Records",
   data=convert_df_to_csv(st.session_state['planetdb']),
   file_name='planets.csv',
