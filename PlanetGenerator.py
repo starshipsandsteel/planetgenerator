@@ -4,9 +4,22 @@ import random
 import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
+import pandas as pd
 from noise import snoise3
+import os
 
-def newplanet(selectedtype,selectedsize):
+def newplanet(planetdb,selectedtype,selectedsize,planetseed=0):
+    
+    if planetseed==0 or planetseed is None or planetseed=="":
+        random_data = os.urandom(8)
+        seed = int.from_bytes(random_data, byteorder="big")
+        random.seed(str(seed))
+
+    else:
+        seed=planetseed
+        random.seed(planetseed)
+
+    
     planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal","Steppe"]
     planetsize=["Dwarf","Small","Small","Medium","Medium","Medium","Large","Giant","Gas Giant Moon"]
     planetfeatures=["Massive Canyon System","Towering Spires","Unique Weather Phenomenon","Massive Sinkholes","Titanic Geysers",
@@ -115,6 +128,7 @@ def newplanet(selectedtype,selectedsize):
     elif planetnameswitch==4:
         planetname=prefix+root+"-"+designation
 
+    graphicseed=random.randint(0,1000000)
     planet_dict={"name":planetname.title(),
                 "type":type,
                 "size":size,
@@ -130,11 +144,27 @@ def newplanet(selectedtype,selectedsize):
                 "atmosphere":atmosphere,
                 "atmosphere notes":breathable,
                 "gravity":gravity,
-                "hours in day":hoursinday}
-    return planet_dict
+                "hours in day":hoursinday,
+                "graphicseed":graphicseed,
+                "record id":seed}
 
-def planet_graphics(type,caps,size):
+    graphicseed=random.randint(0,1000000)
+    tempplanetdb=pd.DataFrame(planet_dict,index=[0])
+
+    planetdb=pd.concat([planetdb,tempplanetdb])
     
+    ##PLANETDB add row
+    return planet_dict,planetdb
+
+
+
+def planet_graphics(type,caps,size,graphicseed=0):
+    # Returns 3 figured and a list of POIS
+    # planet_fig,planet_map_poi,planet_map,pois
+
+    random.seed(graphicseed)
+    np.random.seed(graphicseed)  # Ensures randomness on each run
+
     psize={"Dwarf":0.75,"Small":1,"Medium":1.25,"Large":1.75,"Giant":2,"Gas Giant Moon":0.70}
     psizeres={"Dwarf":200,"Small":250,"Medium":300,"Large":450,"Giant":500,"Gas Giant Moon":200}
     size_attrib=psize[size]
@@ -148,7 +178,6 @@ def planet_graphics(type,caps,size):
     lacunarity = 2.0                # Frequency
 
     # Randomize parameters for unique worlds
-    np.random.seed()  # Ensures randomness on each run
     random_offset = np.random.uniform(-1000, 1000, size=3)  # Random offset for noise
     scale_variation = np.random.uniform(0.8, 1.2)           # Random variation in scale
     scale = base_scale * scale_variation
@@ -413,8 +442,12 @@ st.title("Galactic Cartographers")
 # Generate initial planet if init was not stored in session state
 # if init exists in session state do not run this code.
 if "init" not in st.session_state:
-    planet_dict=newplanet("Any","Any")
-    planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
+    # planetdb holds a record of all planets that have been created in a session as well as the randomseed used to generate graphics.
+    planetdb=pd.DataFrame(columns=["type","size","features","icecaps","settlement size","settlements","development","law",
+                                "price modifier","distance to star","avg temperature (c)","atmosphere","atomosphere notes",
+                                "gravity","hours in day","graphicseed","record id"])
+    planet_dict,st.session_state['planetdb']=newplanet(planetdb,"Any","Any",0)
+    planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"],planet_dict["graphicseed"])
     poidict=generate_pois(pois)
 
 # Store initial planet in session states
@@ -431,16 +464,17 @@ if "planet_dict" not in st.session_state:
     print("Added to Session State")
 if "planet_poi" not in st.session_state:
     st.session_state["planet_poi"]=poidict
-
-
+if "planetdb" not in st.session_state:
+    st.session_state["planetdb"]=planetdb
 
 with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
     planettype=st.selectbox("Planet Type to Retrieve",("Any","Desert","Jungle","Rocky","Oceanic","Crystal","Frozen","Volcanic","Steppe"),)
     planetsize=st.selectbox("Planet Size to Retrieve",("Any","Gas Giant Moon","Dwarf","Small","Medium","Large","Giant"),)
+    planetseed=st.text_input("Planet Record ID")
     if(st.button("Retrieve New World")):
-        planet_dict=newplanet(planettype,planetsize)
-        planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"])
+        planet_dict,st.session_state['planetdb']=newplanet(st.session_state['planetdb'],planettype,planetsize,planetseed)
+        planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"],planet_dict["graphicseed"])
         poidict=generate_pois(pois)
         st.session_state["poimap"]=planet_map_poi
         st.session_state["map"]=planet_map
@@ -466,7 +500,7 @@ config_globe = {'displayModeBar': True,
 col1, col2 = st.columns(2,vertical_alignment="top",border=True)
 
 for x in st.session_state["planet_dict"]:
-    if x!="name":
+    if x!="name" and x!="graphicseed":
         col1.write (f"{x.title()}: {st.session_state['planet_dict'][x]}")
 col2.plotly_chart(st.session_state["planet_fig"],config=config_globe)
 st.header('Planetary Map View')
