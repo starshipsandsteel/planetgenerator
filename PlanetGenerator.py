@@ -280,8 +280,6 @@ def planet_graphics(type,caps,size,graphicseed=0):
         poi_lat=[]
         poi_lon=[]
         
-
-    print(poinumber)
     # Extract coordinates for POIs
     #poi_x = x_distorted[selected_pois[:, 0], selected_pois[:, 1]]
     #poi_y = y_distorted[selected_pois[:, 0], selected_pois[:, 1]]
@@ -420,7 +418,7 @@ def generate_poi_name(poi_type):
 
 # Generate Points of Interest (POIs)
 def generate_pois(num_pois,type):
-    print(type)
+
     pois=[]
     if type=="Gas Giant" and num_pois>0:
 
@@ -586,8 +584,11 @@ else:
 #st.header('Planetary Sites View')
 
 tab1.write("## Planetary Sites")
-for x in range(0,len(st.session_state["planet_poi"])):
-    tab1.write(f"{x+1}: {st.session_state['planet_poi'][x]['name']} ({st.session_state['planet_poi'][x]['type']})")
+if len(st.session_state["planet_poi"])>0:
+    for x in range(0,len(st.session_state["planet_poi"])):
+        tab1.write(f"{x+1}: {st.session_state['planet_poi'][x]['name']} ({st.session_state['planet_poi'][x]['type']})")
+else:
+    tab1.write("Nothing of Interest")
 
 tab2.write("## Previously Viewed")
 tab2.dataframe(st.session_state['planetdb'])
