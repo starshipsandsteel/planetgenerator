@@ -9,7 +9,6 @@ from noise import snoise3
 import os
 
 def newplanet(planetdb,selectedtype="Any",selectedsize="Any",planetseed=0):
-    
     if planetseed==0 or planetseed is None or planetseed=="":
         random_data = os.urandom(8)
         seed = int(int.from_bytes(random_data, byteorder="big")/1000000000000)
@@ -20,8 +19,7 @@ def newplanet(planetdb,selectedtype="Any",selectedsize="Any",planetseed=0):
         seed=planetseed
         random.seed(planetseed)
 
-    
-    planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal","Steppe"]
+    planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal","Steppe","Gas Giant"]
     planetsize=["Dwarf","Small","Small","Medium","Medium","Medium","Large","Giant","Gas Giant Moon"]
     planetfeatures=["Massive Canyon System","Towering Spires","Unique Weather Phenomenon","Massive Sinkholes","Titanic Geysers",
                     "Craters","Colossal Fossils", "Hostile Life: Flora","Hostile Life: Fauna"]
@@ -66,10 +64,11 @@ def newplanet(planetdb,selectedtype="Any",selectedsize="Any",planetseed=0):
     ]
 
     tempmodifier={"Close":10,"Medium":0,"Far":-10,"Extreme":-20}
-    typetempmodifier={"Desert":20,"Jungle":20,"Oceanic":0,"Volcanic":10,"Frozen":-50,"Rocky":0,"Crystal":0,"Steppe":0}
-    basetemp={"Desert":20,"Jungle":20,"Oceanic":15,"Volcanic":10,"Frozen":-10,"Rocky":0,"Gas Giant w/ Moons":0,"Crystal":0,"Steppe":20}
-    gravitymod={"Dwarf":0.75,"Small":0.85,"Medium":1,"Large":1.3,"Giant":2,"Gas Giant Moon":0.75}
-    daymod={"Dwarf":-5,"Small":-3,"Medium":0,"Large":2,"Giant":4,"Gas Giant Moon":0}
+    typetempmodifier={"Desert":20,"Jungle":20,"Oceanic":0,"Volcanic":10,"Frozen":-50,"Rocky":0,"Crystal":0,"Steppe":0,"Gas Giant":0}
+    basetemp={"Desert":20,"Jungle":20,"Oceanic":15,"Volcanic":10,"Frozen":-10,"Rocky":0,"Gas Giant w/ Moons":0,"Crystal":0,"Steppe":20,"Gas Giant":50}
+    gravitymod={"Dwarf":0.75,"Small":0.85,"Medium":1,"Large":1.3,"Giant":2,"Gas Giant Moon":0.75,"Gas Giant":5}
+    daymod={"Dwarf":-5,"Small":-3,"Medium":0,"Large":2,"Giant":4,"Gas Giant Moon":0,"Gas Giant":10}
+
 
     if selectedtype=="Any":
         type=random.choice(planettype)
@@ -79,13 +78,24 @@ def newplanet(planetdb,selectedtype="Any",selectedsize="Any",planetseed=0):
         size=random.choice(planetsize)
     else:
         size=selectedsize
-    numfeat=random.randint(1,4)
-    features=random.sample(planetfeatures,numfeat)
-    featurelist=", ".join(features)
-    #mood=random.choice(planetmood)
-    icecaps=random.choice(planeticecaps)
 
-    settlements=random.choice(planetsettlements)
+
+
+    if type=="Gas Giant":
+        icecaps="None"
+        settlements="None"
+        moons=random.randint(1,5)
+        features = f"{moons} terrestrial moons."
+        featurelist=features
+        size="Gas Giant"
+    else:
+        icecaps=random.choice(planeticecaps)
+        settlements=random.choice(planetsettlements)
+        numfeat=random.randint(1,4)
+        features=random.sample(planetfeatures,numfeat)
+        featurelist=", ".join(features)
+
+
     if settlements!="None":
         settlementsize=random.choice(planetsettlmentsize)
         law=random.choice(planetarylaw)
@@ -167,17 +177,24 @@ def planet_graphics(type,caps,size,graphicseed=0):
     random.seed(graphicseed)
     np.random.seed(graphicseed)  # Ensures randomness on each run
 
-    psize={"Dwarf":0.75,"Small":1,"Medium":1.25,"Large":1.75,"Giant":2,"Gas Giant Moon":0.70}
-    psizeres={"Dwarf":200,"Small":250,"Medium":300,"Large":450,"Giant":500,"Gas Giant Moon":200}
+    psize={"Dwarf":0.75,"Small":1,"Medium":1.25,"Large":1.75,"Giant":2,"Gas Giant Moon":0.70,"Gas Giant":2}
+    psizeres={"Dwarf":200,"Small":250,"Medium":300,"Large":450,"Giant":500,"Gas Giant Moon":200,"Gas Giant":500}
     size_attrib=psize[size]
     sizeres=psizeres[size]
     # Parameters for random world generation
     resolution = int(sizeres)       # Higher resolution for smoothness
     radius = size_attrib            # Radius of the sphere
-    base_scale = size_attrib*1.5    # Base scale for continent size
-    octaves = 5                     # Detail level
-    persistence = 0.6               # Smooth terrain transitions
-    lacunarity = 2.0                # Frequency
+    base_scale = size_attrib*1.5   # Base scale for continent size 1.5
+    octaves = 5                    # Detail level 5
+    persistence = 0.6               # Smooth terrain transitions 0.6
+    lacunarity = 2               # Frequency 2.0
+
+    # Gas giant paramters
+    if type=="Gas Giant":
+        base_scale = size_attrib*.25
+        octaves=1
+        persistence=0
+        lacunarity=1
 
     # Randomize parameters for unique worlds
     random_offset = np.random.uniform(-1000, 1000, size=3)  # Random offset for noise
@@ -243,25 +260,33 @@ def planet_graphics(type,caps,size,graphicseed=0):
     combined_terrain = np.maximum(normalized_elevation, ice_cap_gradient)
 
     # get POI range per type
-    poirange={"Oceanic":[0.8,.9],"Desert":[0.1,.9],"Volcanic":[0.6,.9],"Frozen":[0.1,.9],"Rocky":[0,.9],"Crystal":[0,.9],"Jungle":[0.4,.9],"Steppe":[0.4,.9]}
+    poirange={"Oceanic":[0.8,.9],"Desert":[0.1,.9],"Volcanic":[0.6,.9],"Frozen":[0.1,.9],"Rocky":[0,.9],"Crystal":[0,.9],"Jungle":[0.4,.9],"Steppe":[0.4,.9],"Gas Giant":[0,1]}
     lower=poirange[type][0]
     upper=poirange[type][1]
     # Add Points of Interest (POIs)
-    poimax={"Dwarf":3,"Small":4,"Medium":5,"Large":7,"Giant":10,"Gas Giant Moon":2}
-    poi_indices = np.argwhere((combined_terrain > lower) & (combined_terrain< upper))
-    rng = np.random.default_rng()
-    poinumber=rng.integers(poimax[size])+1
-    selected_pois = poi_indices[np.random.choice(poi_indices.shape[0], size=poinumber, replace=False)]  # Select 5 random POIs
+    poimax={"Dwarf":3,"Small":4,"Medium":5,"Large":7,"Giant":10,"Gas Giant Moon":2,"Gas Giant":1}
     textpoints=[]
-    for x in range(1,poinumber+1):
-        textpoints.append(str(x))
+    rng = np.random.default_rng()
+    poinumber=rng.integers(poimax[size],endpoint=True)
+    if poinumber>0:
+        poi_indices = np.argwhere((combined_terrain > lower) & (combined_terrain< upper))
+        selected_pois = poi_indices[np.random.choice(poi_indices.shape[0], size=poinumber, replace=False)]  # Select 5 random POIs
+        poi_lat = latitude[selected_pois[:, 0], selected_pois[:, 1]]
+        poi_lon = np.degrees(theta_grid[selected_pois[:, 0], selected_pois[:, 1]]) - 180
+        for x in range(1,poinumber+1):
+            textpoints.append(str(x))
+    else:
+        selected_pois=[]
+        poi_lat=[]
+        poi_lon=[]
+        
 
+    print(poinumber)
     # Extract coordinates for POIs
     #poi_x = x_distorted[selected_pois[:, 0], selected_pois[:, 1]]
     #poi_y = y_distorted[selected_pois[:, 0], selected_pois[:, 1]]
     #poi_z = z_distorted[selected_pois[:, 0], selected_pois[:, 1]]
-    poi_lat = latitude[selected_pois[:, 0], selected_pois[:, 1]]
-    poi_lon = np.degrees(theta_grid[selected_pois[:, 0], selected_pois[:, 1]]) - 180
+
 
     # Color scale for terrain
     colortype={"Desert":[[0.0,'cyan'],[0.1,"#c4830d"],[0.5,"#aa6d04"],[0.7,"#835204"],[0.95,"#643c04"],[1,"#E0FFFF"]],
@@ -271,9 +296,19 @@ def planet_graphics(type,caps,size,graphicseed=0):
                "Frozen":[[0.0, 'cyan'],[0.4, '#B4ECFF'], [0.5, '#C7E9F5'], [0.5, '#eab676'], [0.65, '#FFFFFF'], [0.9, 'white'],[1,"#E0FFFF"]],
                "Rocky":[[0.0, '#483104'],[0.4, '#674606'], [0.5, '#3F2B05'], [0.85, '#865b0b '], [0.98, 'white'],[1,"#E0FFFF"]],
                "Crystal":[[0.0, '#C54F9E'],[0.4, '#BF3893'], [0.5, '#6B2E57'], [0.7, '#CECB24'], [0.95, 'white'],[1,"#E0FFFF"]],
+               "Gas Giant":[[0.0, '#C54F9E'], [0.5, 'red'], [0.95, 'violet'],[1,"#E0FFFF"]],
+               "Gas Giant2":[[0.2, '#212354'], [0.4,'#3e54e8'],[0.6, '#3e66f9'], [0.8, '#6081ff'],[1,"#89f3ff"]],
                "Steppe":[[0.0, 'blue'],[0.2, 'cyan'], [0.35, '#fff59d'], [0.5, '#dce775'],[0.6, '#8bc34a'],[0.7, '#f3bc77'],[0.9, '#402a23'], [0.95, 'white'],[1,"#E0FFFF"]],
                }
-    colorscale=colortype[type]
+   
+    if type=="Gas Giant":
+        typechoice=random.randint(1,2)
+        if typechoice==1:
+            colorscale=colortype["Gas Giant"]
+        else:
+            colorscale=colortype["Gas Giant2"]
+    else:
+         colorscale=colortype[type]
     if type=="Volcanic":
         dotcolor="black"
     else:
@@ -384,17 +419,47 @@ def generate_poi_name(poi_type):
         return f"{random.choice(manmade_prefixes)} {random.choice(manmade_suffixes)}"
 
 # Generate Points of Interest (POIs)
-def generate_pois(num_pois):
-    # Create POI data with types
-    poi_types = ["Natural", "Man-made"]
-    pois = []
-    for x in range(0,num_pois):
-        poi_type = random.choice(poi_types)
-        name = generate_poi_name(poi_type)
+def generate_pois(num_pois,type):
+    print(type)
+    pois=[]
+    if type=="Gas Giant" and num_pois>0:
+
+        space_stations = ["Fueling Station",          # Extracts and refines gas for fuel
+            "Secret Military Base",     # Covert operations and surveillance
+            "Pirate Haven",             # A lawless station used by smugglers
+            "Ancient Relic",            # A massive abandoned alien structure
+            "Black Market Trade Hub",   # A hub for illegal goods and deals
+            "Orbital Shipyard",         # Repairs and constructs ships in orbit
+            "Science Research Lab",     # Studies the gas giant’s atmosphere and anomalies
+            "Luxury Resort Station",    # A high-end getaway with a view of the storms
+            "Listening Post",           # Used for deep-space surveillance
+            "Prison Station",           # A high-security facility in deep orbit
+            "Corporate Headquarters",   # A megacorporation's private orbital facility
+            "Refugee Colony",           # A desperate settlement on an old station
+            "Gravity Research Facility",# Studies gravity anomalies around the gas giant
+            "Dark Matter Extraction",   # Harvesting exotic particles from the planet’s core
+            "Crash Site",               # Wreckage of a massive derelict station
+            "AI-Controlled Station",    # A fully automated installation with unknown intentions
+            "Xeno-Archaeology Outpost", # Studying alien ruins on a nearby moon
+            "Casino & Entertainment Hub", # A floating space casino for travelers and criminals alike
+            "Quarantine Station",       # Isolating a mysterious disease or experiment gone wrong
+            "Warlord’s Stronghold",     # Controlled by a rogue general or pirate king
+        ]
         pois.append({
-            "name": name,
-            "type": poi_type
+            "name": "Orbitting Sturcture",
+            "type":random.choice(space_stations)
         })
+        
+    elif type!="Gas Giant":
+        # Create POI data with types
+        poi_types = ["Natural", "Man-made"]
+        for x in range(0,num_pois):
+            poi_type = random.choice(poi_types)
+            name = generate_poi_name(poi_type)
+            pois.append({
+                "name": name,
+                "type": poi_type
+            })
 
     return pois
 def convert_df_to_csv(df):
@@ -453,7 +518,7 @@ if "init" not in st.session_state:
                                 "gravity","hours in day","graphicseed","record id"])
     planet_dict,st.session_state['planetdb']=newplanet(planetdb,"Any","Any",0)
     planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"],planet_dict["graphicseed"])
-    poidict=generate_pois(pois)
+    poidict=generate_pois(pois,planet_dict["type"])
 
 # Store initial planet in session states
 if "init" not in st.session_state:
@@ -474,13 +539,13 @@ if "planetdb" not in st.session_state:
 
 with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
-    planettype=st.selectbox("Planet Type to Retrieve",("Any","Desert","Jungle","Rocky","Oceanic","Crystal","Frozen","Volcanic","Steppe"),)
+    planettype=st.selectbox("Planet Type to Retrieve",("Any","Desert","Jungle","Rocky","Oceanic","Crystal","Frozen","Volcanic","Steppe","Gas Giant"),)
     planetsize=st.selectbox("Planet Size to Retrieve",("Any","Gas Giant Moon","Dwarf","Small","Medium","Large","Giant"),)
     planetseed=st.text_input("Planet Record ID")
     if(st.button("Retrieve New World")):
         planet_dict,st.session_state['planetdb']=newplanet(st.session_state['planetdb'],planettype,planetsize,planetseed)
         planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"],planet_dict["graphicseed"])
-        poidict=generate_pois(pois)
+        poidict=generate_pois(pois,planet_dict["type"])
         st.session_state["poimap"]=planet_map_poi
         st.session_state["map"]=planet_map
         st.session_state["planet_fig"]=planet_fig
