@@ -8,7 +8,7 @@ import pandas as pd
 from noise import snoise3
 import os
 
-def newplanet(planetdb,selectedtype="Any",selectedsize="Any",planetseed=0):
+def newplanet(planetdb,selectedtype="Any",selectedsize="Any",orbitdistance=0,planetseed=0):
     if planetseed==0 or planetseed is None or planetseed=="":
         random_data = os.urandom(8)
         seed = int(int.from_bytes(random_data, byteorder="big")/1000000000000)
@@ -19,7 +19,8 @@ def newplanet(planetdb,selectedtype="Any",selectedsize="Any",planetseed=0):
         seed=planetseed
         random.seed(planetseed)
 
-    planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal","Steppe","Gas Giant"]
+    planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal","Steppe"]
+    outerplanetype=["Gas Giant","Gas Giant","Gas Giant","Rocky"]
     planetsize=["Dwarf","Small","Small","Medium","Medium","Medium","Large","Giant","Gas Giant Moon"]
     planetfeatures=["Massive Canyon System","Towering Spires","Unique Weather Phenomenon","Massive Sinkholes","Titanic Geysers",
                     "Craters","Colossal Fossils", "Hostile Life: Flora","Hostile Life: Fauna"]
@@ -29,7 +30,7 @@ def newplanet(planetdb,selectedtype="Any",selectedsize="Any",planetseed=0):
     planetdevelopment=["Low","Low","Medium","Medium","High"]
     pricemodifier=[1,1,1,1,1.25,1.25,1.5,1.5,1.75,1.75,2]
     planetarylaw=["Low","Medium","High","Martial","Military"]
-    planetdistance=["Close","Medium","Far","Extreme"]
+    planetdistance=["Close","Close","Medium","Medium","Far","Far","Extreme","Extreme"]
     planetatmospheretype=["Normal","Thin","Trace","Thick"]
     planetatmosphere=["Yes","No"]
     atmobreathable=["Breathable","Breathable","Breathable","Toxic Clouds","Acid Rain"]
@@ -73,13 +74,15 @@ def newplanet(planetdb,selectedtype="Any",selectedsize="Any",planetseed=0):
     if selectedtype=="Any":
         type=random.choice(planettype)
     else:
+        if orbitdistance>4:
+            type=np.random.choice(outerplanetype)
+        else:
+            type=np.random.choice(planettype)
         type=selectedtype
     if selectedsize=="Any":
         size=random.choice(planetsize)
     else:
         size=selectedsize
-
-
 
     if type=="Gas Giant":
         icecaps="None"
@@ -117,7 +120,10 @@ def newplanet(planetdb,selectedtype="Any",selectedsize="Any",planetseed=0):
         atmosphere="None"
         breathable="None"
 
-    distance=random.choice(planetdistance)
+    if orbitdistance==0:
+        distance=random.choice(planetdistance)
+    else:
+        distance=planetdistance[orbitdistance]
 
     temp=random.randint(10,30)+tempmodifier[distance]+basetemp[type]+typetempmodifier[type]
     gravity=round((random.randint(8,12))/10*gravitymod[size],1)
@@ -171,7 +177,7 @@ def newplanet(planetdb,selectedtype="Any",selectedsize="Any",planetseed=0):
 
 
 def planet_graphics(type,caps,size,graphicseed=0):
-    # Returns 3 figured and a list of POIS
+    # Returns 3 figured and a number of POIS
     # planet_fig,planet_map_poi,planet_map,pois
 
     random.seed(graphicseed)
@@ -514,7 +520,7 @@ if "init" not in st.session_state:
     planetdb=pd.DataFrame(columns=["name","type","size","features","icecaps","settlement size","settlements","development","law",
                                 "price modifier","distance to star","avg temperature (c)","atmosphere","atomosphere notes",
                                 "gravity","hours in day","graphicseed","record id"])
-    planet_dict,st.session_state['planetdb']=newplanet(planetdb,"Any","Any",0)
+    planet_dict,st.session_state['planetdb']=newplanet(planetdb,"Any","Any",0,0)
     planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"],planet_dict["graphicseed"])
     poidict=generate_pois(pois,planet_dict["type"])
 
@@ -541,7 +547,7 @@ with st.sidebar:
     planetsize=st.selectbox("Planet Size to Retrieve",("Any","Gas Giant Moon","Dwarf","Small","Medium","Large","Giant"),)
     planetseed=st.text_input("Planet Record ID")
     if(st.button("Retrieve New World")):
-        planet_dict,st.session_state['planetdb']=newplanet(st.session_state['planetdb'],planettype,planetsize,planetseed)
+        planet_dict,st.session_state['planetdb']=newplanet(st.session_state['planetdb'],planettype,planetsize,0,planetseed)
         planet_fig,planet_map_poi,planet_map,pois=planet_graphics(planet_dict["type"],planet_dict["icecaps"],planet_dict["size"],planet_dict["graphicseed"])
         poidict=generate_pois(pois,planet_dict["type"])
         st.session_state["poimap"]=planet_map_poi
