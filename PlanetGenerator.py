@@ -111,7 +111,8 @@ config_globe = {'displayModeBar': True,
 with tab1:
     col1, col2 = st.columns(2,vertical_alignment="top",border=True)
     for x in st.session_state["planet_dict"]:
-        if x!="name" and x!="graphicseed" and x!="orbit":
+        cells_donotplot=["name","graphicseed","orbit","color","plotsize"]
+        if x not in cells_donotplot:
                 with col1:
                     st.write (f"{x.title()}: {st.session_state['planet_dict'][x]}")
     with col2:

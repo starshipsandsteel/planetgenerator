@@ -175,7 +175,6 @@ def newplanet(planetdb,selectedtype="Any",selectedsize="Any",orbitdistance=0,pla
                 "graphicseed":graphicseed,
                 "record id":seed}
 
-    graphicseed=random.randint(0,1000000)
     tempplanetdb=pd.DataFrame(planet_dict,index=[0])
 
     planetdb=pd.concat([planetdb,tempplanetdb])
