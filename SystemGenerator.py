@@ -4,7 +4,7 @@ import random
 import pandas as pd
 import os
 import streamlit as st
-from PlanetGenerator import newplanet
+from PlanetGeneratorFunctions import newplanet
 
 def convert_df_to_csv(df):
   # IMPORTANT: Cache the conversion to prevent computation on every rerun
@@ -22,14 +22,13 @@ def ellipse_arc(x_center=0, y_center=0, a=1, b =1, start_angle=0, end_angle=2*np
     return path
 
 def generate_system():
-    baseorbit=15
-    systemdf=pd.DataFrame(columns=["type","color","size","plotsize","orbit","orbitposition","level"])
+    #baseorbit=15
+    systemdf=pd.DataFrame()
 
     random_data = os.urandom(8)
     seed = int(int.from_bytes(random_data, byteorder="big")/1000000000000)
     seed=f"svrn-{seed}"
     random.seed(str(seed))
-
 
     startypes = [
         "O-type",  # Hot, massive, and blue
@@ -79,18 +78,18 @@ def generate_system():
     }
 
     star_orbits = {
-        "O-type": 5,        # Very hot, blue stars
+        "O-type": 7,        # Very hot, blue stars
         "B-type": 4,        # Slightly cooler than O-type
-        "A-type": 3,        # White to blue-white
+        "A-type": 4,        # White to blue-white
         "F-type": 3,        # Yellow-white stars
-        "G-type": 0,        # Sun-like, yellow
+        "G-type": 1,        # Sun-like, yellow
         "K-type": 0,        # Orange-hued stars
         "M-type": 0,        # Red dwarfs
         "L-type": 0,        # Brown dwarfs
         "T-type": 0,        # Cooler brown dwarfs with methane absorption
         "Y-type": 0,        # The coolest brown dwarfs
-        "Wolf-Rayet": 4,    # Massive, luminous, often pinkish due to ionized gas
-        "Red Giant": 5,     # Late-stage, massive red stars
+        "Wolf-Rayet": 5,    # Massive, luminous, often pinkish due to ionized gas
+        "Red Giant": 3,     # Late-stage, massive red stars
         "White Dwarf": 0
     }
 
@@ -102,30 +101,36 @@ def generate_system():
     print(minorbit)
     for x in range(minorbit,8):
         orbitrow=[]
-        planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal","Steppe","None","None","Asteroid","Asteroid"]
-        outerplanetype=["Gas Giant","Gas Giant","Gas Giant","Rocky"]
-        planetsize=["Dwarf","Small","Small","Medium","Medium","Medium","Large","Giant"]
-        gasgiantsize=["Giant","Gas Giant","Small Gas Giant"]
-        planetcolor={"Desert":'darkgoldenrod',"Jungle":'darkgreen',"Oceanic":'blue',"Volcanic":'red',"Frozen":'aqua',"Rocky":"brown","Crystal":'purple',"Steppe":"greenyellow","None":"black","Asteroid":"brown","Gas Giant":"pink"}
-        planetdisplaysize={"Dwarf":10,"Small":15,"Medium":25,"Large":35,"Giant":45,"Gas Giant Moon":0.75,"Asteroid":8,"Small Gas Giant":55,"Gas Giant":70}
-        if x-minorbit>4:
-            type=np.random.choice(outerplanetype)
-        else:
-            type=np.random.choice(planettype)
-        if type=="Gas Giant":
-            size=np.random.choice(gasgiantsize)
-        else:
-            size=np.random.choice(planetsize)
-        orbit=baseorbit+(10*x)
-        orbitrow.append(type)
-        orbitrow.append(planetcolor[type])
-        orbitrow.append(size)
-        orbitrow.append(planetdisplaysize[size])
-        orbitrow.append(orbit)
-        orbitrow.append(x)
-        orbitrow.append(10)
-        systemdf.loc[len(systemdf)]=orbitrow
-
+        
+        #planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal","Steppe","None","None","Asteroid","Asteroid"]
+        #outerplanetype=["Gas Giant","Gas Giant","Gas Giant","Rocky"]
+        #planetsize=["Dwarf","Small","Small","Medium","Medium","Medium","Large","Giant"]
+        #gasgiantsize=["Giant","Gas Giant","Small Gas Giant"]
+        #planetcolor={"Desert":'darkgoldenrod',"Jungle":'darkgreen',"Oceanic":'blue',"Volcanic":'red',"Frozen":'aqua',"Rocky":"brown","Crystal":'purple',"Steppe":"greenyellow","None":"black","Asteroid":"brown","Gas Giant":"pink"}
+        #planetdisplaysize={"Dwarf":10,"Small":15,"Medium":25,"Large":35,"Giant":45,"Gas Giant Moon":0.75,"Asteroid":8,"Small Gas Giant":55,"Gas Giant":70}
+        #if x-minorbit>4:
+        #    type=np.random.choice(outerplanetype)
+        #else:
+        #    type=np.random.choice(planettype)
+        #if type=="Gas Giant":
+        #    size=np.random.choice(gasgiantsize)
+        #else:
+        #    size=np.random.choice(planetsize)
+        #
+        #def newplanet(planetdb,selectedtype="Any",selectedsize="Any",orbitdistance=0,planetseed=0):
+        planetdict,systemdf=newplanet(systemdf,orbitdistance=x)
+        
+        #'''
+        #orbitrow.append(type)
+        #orbitrow.append(planetcolor[type])
+        #orbitrow.append(size)
+        #orbitrow.append(planetdisplaysize[size])
+        #orbitrow.append(orbit)
+        #orbitrow.append(x)
+        #orbitrow.append(10)
+        #'''
+        #systemdf.loc[len(systemdf)]=orbitrow
+    systemdf["level"]=10
     systemdf=systemdf[systemdf["type"]!="None"]
     asteroiddf=systemdf[systemdf["type"]=="Asteroid"]
     print(f"Star: {star}")
