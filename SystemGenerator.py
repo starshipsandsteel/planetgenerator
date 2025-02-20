@@ -4,7 +4,7 @@ import random
 import pandas as pd
 import os
 import streamlit as st
-from PlanetGeneratorFunctions import newplanet
+from PlanetGeneratorFunctions import newplanet,planet_graphics
 
 def convert_df_to_csv(df):
   # IMPORTANT: Cache the conversion to prevent computation on every rerun
@@ -21,14 +21,38 @@ def ellipse_arc(x_center=0, y_center=0, a=1, b =1, start_angle=0, end_angle=2*np
         path += ' Z'
     return path
 
-def generate_system():
-    #baseorbit=15
+def generate_system(seed=0):
+    #print(seed)
+    if seed==0 or seed is None or seed=="":
+        random_data = os.urandom(8)
+        seed = int(int.from_bytes(random_data, byteorder="big")/1000000000000)
+        seed=f"sys-svrn-{seed}"
+        random.seed(str(seed))
+    else:
+        print(f"Generating {seed}")
+        random.seed(seed)
     systemdf=pd.DataFrame()
 
-    random_data = os.urandom(8)
-    seed = int(int.from_bytes(random_data, byteorder="big")/1000000000000)
-    seed=f"svrn-{seed}"
-    random.seed(str(seed))
+    prefixes = ["Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Theta", "Omicron", 
+            "Nova", "XJ", "YV", "ZX", "Upsilon", "Tau", "Sigma", "Lambda", "Kappa"]
+
+    # Core name parts for variety
+    name_parts = ["Orion", "Draconis", "Vega", "Nyx", "Seraphis", "Tarsis", "Solari", "Nebulus", 
+              "Vorlax", "Eldara", "Typhon", "Sirius", "Hyperion", "Zephyrus", "Callidus", "Lyra", 
+              "Polaris", "Aetheris", "Icarus", "Prometheus", "Cygni", "Rigel", "Andara"]
+
+    # Expanded suffixes for uniqueness
+    suffixes = ["Prime", "Minor", "Major", "Nexus", "Core", "Outpost",
+            "Sector", "Expanse", "Horizon", "Bastion", "Stronghold", "Citadel", "Terminus", 
+            "Observatory", "Harbinger", "Apex", "Sentinel", "Pinnacle", "Echelon", "Periphery", 
+            "Zenith", "Dominion", "Frontier", "Ascendancy", "Anomaly", "Haven", "Sanctuary"]
+
+
+    prefix = random.choice(prefixes)
+    core_name = random.choice(name_parts)
+    suffix = random.choice(suffixes) if random.random() > 0.3 else ""  # Optional suffix
+
+    systemname=f"{prefix} {core_name} {suffix}"
 
     startypes = [
         "O-type",  # Hot, massive, and blue
@@ -78,7 +102,7 @@ def generate_system():
     }
 
     star_orbits = {
-        "O-type": 7,        # Very hot, blue stars
+        "O-type": 6,        # Very hot, blue stars
         "B-type": 4,        # Slightly cooler than O-type
         "A-type": 4,        # White to blue-white
         "F-type": 3,        # Yellow-white stars
@@ -98,27 +122,28 @@ def generate_system():
     starcolor=star_colors[star]
     starsize=star_sizes[star]
     minorbit=star_orbits[star]
-    print(minorbit)
+    #print(minorbit)
     for x in range(minorbit,8):
         orbitrow=[]
         
-        #planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal","Steppe","None","None","Asteroid","Asteroid"]
-        #outerplanetype=["Gas Giant","Gas Giant","Gas Giant","Rocky"]
+        planettype=["Any","Any","Any","Any","Any","Any","Any","Any","None","None","Asteroid","Asteroid"]
+        outerplanetype=["Any","Any","Any","Any"]
         #planetsize=["Dwarf","Small","Small","Medium","Medium","Medium","Large","Giant"]
         #gasgiantsize=["Giant","Gas Giant","Small Gas Giant"]
         #planetcolor={"Desert":'darkgoldenrod',"Jungle":'darkgreen',"Oceanic":'blue',"Volcanic":'red',"Frozen":'aqua',"Rocky":"brown","Crystal":'purple',"Steppe":"greenyellow","None":"black","Asteroid":"brown","Gas Giant":"pink"}
         #planetdisplaysize={"Dwarf":10,"Small":15,"Medium":25,"Large":35,"Giant":45,"Gas Giant Moon":0.75,"Asteroid":8,"Small Gas Giant":55,"Gas Giant":70}
-        #if x-minorbit>4:
-        #    type=np.random.choice(outerplanetype)
-        #else:
-        #    type=np.random.choice(planettype)
+        if x-minorbit>4:
+            type=random.choice(outerplanetype)
+        else:
+            type=random.choice(planettype)
         #if type=="Gas Giant":
         #    size=np.random.choice(gasgiantsize)
         #else:
         #    size=np.random.choice(planetsize)
         #
         #def newplanet(planetdb,selectedtype="Any",selectedsize="Any",orbitdistance=0,planetseed=0):
-        planetdict,systemdf=newplanet(systemdf,orbitdistance=x)
+        print(f"Seed being passed to planet: {seed}")
+        planetdict,systemdf=newplanet(systemdf,selectedtype=type,orbitdistance=x,systemseed=seed)
         
         #'''
         #orbitrow.append(type)
@@ -131,13 +156,19 @@ def generate_system():
         #'''
         #systemdf.loc[len(systemdf)]=orbitrow
     systemdf["level"]=10
+    systemdf["startype"]=star
+    systemdf["systemname"]=systemname
+    systemdf["system id"]=seed
+    fullsystemdf=pd.DataFrame()
+    fullsystemdf=systemdf
+    #print(fullsystemdf)
     systemdf=systemdf[systemdf["type"]!="None"]
     asteroiddf=systemdf[systemdf["type"]=="Asteroid"]
-    print(f"Star: {star}")
-    print(asteroiddf)
+    #print(f"Star: {star}")
+    #print(asteroiddf)
     systemdf=systemdf[systemdf["type"]!="Asteroid"]
-    print(systemdf)
-    systemdf["startype"]=star
+    #print(systemdf)
+    
 
     fig=go.Figure()
     fig.add_trace(go.Scatter(x=[0],y=[10],mode='markers',marker=dict(size=starsize+10,color='black',line=dict(color=starcolor,width=2))))
@@ -146,13 +177,14 @@ def generate_system():
     orbitalpaths=[]
 
     for index,orbitpos in systemdf.iterrows():
-        print(orbitpos["orbit"])
+        #print(orbitpos["orbit"])
         #fig.add_trace(go.Scatter(x=[0],y=[10],mode='markers',marker=dict(size=525+(orbitpos["orbitposition"]*349),color="rgba(0,0,0,0)",line=dict(color='white',width=0.25))))
         orbitalpaths.append(dict(type="path", path=ellipse_arc(y_center=10,a=orbitpos["orbit"],b=orbitpos["orbit"]-5,N=60),line_color="white",line_width=0.25,line_dash="dot"))
 
-
-    fig.add_trace(go.Scatter(x=systemdf["orbit"],y=systemdf["level"],mode='markers',marker=dict(size=systemdf["plotsize"],color=systemdf["color"],line=dict(color='black'))))
-    fig.add_trace(go.Scatter(x=systemdf["orbit"],y=systemdf["level"],mode='markers',text=["test"],textfont=dict(color="white",size=20),marker=dict(size=systemdf["plotsize"],color=systemdf["color"],line=dict(color='black'))))
+    #print(len(systemdf))
+    if (len(systemdf))>0:
+        fig.add_trace(go.Scatter(x=systemdf["orbit"],y=systemdf["level"],mode='markers',marker=dict(size=systemdf["plotsize"],color=systemdf["color"],line=dict(color='black'))))
+        fig.add_trace(go.Scatter(x=systemdf["orbit"],y=systemdf["level"],mode='markers',text=["test"],textfont=dict(color="white",size=20),marker=dict(size=systemdf["plotsize"],color=systemdf["color"],line=dict(color='black'))))
 
     for x in range(0,10):
         offsetx=random.uniform(-.25,.25)
@@ -176,7 +208,7 @@ def generate_system():
         showlegend=False,
         shapes=orbitalpaths
     )
-    return fig,systemdf
+    return fig,systemdf,fullsystemdf,asteroiddf,seed
 
 st.set_page_config(page_title="System Generator", page_icon=None, layout="wide", initial_sidebar_state="auto", menu_items=None)
 
@@ -220,32 +252,69 @@ st.markdown(
     """, unsafe_allow_html=True
 )
 
+systemdf=pd.DataFrame()
+fig,systemdf,fullsystemdf,asteroiddf,seed=generate_system()
+
+if "init" not in st.session_state:
+    st.session_state["init"]=1
+if "systemdf" not in st.session_state:
+    st.session_state["systemdf"]=systemdf
+if "systemfig" not in st.session_state:
+    st.session_state["systemfig"]=fig
+if "fullsystemfig" not in st.session_state:
+    st.session_state["fullsystemdf"]=fullsystemdf
+    print("Added to Session State")
+if "asteroiddf" not in st.session_state:
+    st.session_state["asteroiddf"]=asteroiddf
+if "systemseed" not in st.session_state:
+    st.session_state["systemseed"]=seed
+
+
 # Set app title
 
 st.title("Galactic Cartographers: System View")
 
-systemdf=pd.DataFrame()
-fig,systemdf=generate_system()
+
 with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
+    systemseed=st.text_input("System ID")
     if(st.button("Retrieve New System")):
-        fig,systemdf=generate_system()
+        st.session_state["systemfig"],st.session_state["systemdf"],st.session_state["fullsystemdf"],st.session_state["asteroiddf"],st.session_state["systemseed"]=generate_system(systemseed)
     st.write("Welcome to the Department of Galactic Cartography, an online catalog of nearly limitless worlds, surveyed or not.")
     st.write("-------------------------------")
     st.write("This was written to build out entire star systems for a Savage Worlds game, but with the idea of it being 100% system agnostic.")
     st.write("Scroll down to see a list of the worlds and their ID.") 
     st.write("Be sure to set them to full screen before you capture the system.")
 
+tab1,tab2=st.tabs(["System View","Planet Explorer"])
 
 config_globe = {'displayModeBar': True,
         'use_container_width':False}
+with tab1:
+    st.header(f"Star: {st.session_state['fullsystemdf']['systemname'].iloc[0]}")
+    st.write(f"Star: {st.session_state['fullsystemdf']['startype'].iloc[0]}")
+    st.write(f"System ID: {st.session_state['fullsystemdf']['system id'].iloc[0]}")
+    st.plotly_chart(st.session_state["systemfig"],config=config_globe)
+    st.dataframe(st.session_state["systemdf"])
 
-st.plotly_chart(fig,config=config_globe)
-st.dataframe(systemdf)
 
+
+with tab2:
+    st.header(f"Star: {st.session_state['fullsystemdf']['systemname'].iloc[0]}")
+    st.write(f"Star: {st.session_state['fullsystemdf']['startype'].iloc[0]}")
+    st.write(f"System ID: {st.session_state['fullsystemdf']['system id'].iloc[0]}")
+    choice=st.selectbox("Choose Planet to View",st.session_state["systemdf"]["name"])
+    print(choice)
+    chosenplanet=st.session_state["systemdf"][st.session_state["systemdf"]["name"]==choice]
+    planetseed=int(chosenplanet["graphicseed"].iloc[0])
+    print(planetseed)
+
+
+    fig,fig_flat_poi,fig_flat,poinumber=planet_graphics(chosenplanet["type"].iloc[0],chosenplanet["icecaps"].iloc[0],chosenplanet["size"].iloc[0],graphicseed=planetseed)
+    tab2.plotly_chart(fig,config=config_globe)
 st.download_button(
   label="Download Planetary Records",
-  data=convert_df_to_csv(systemdf),
+  data=convert_df_to_csv(st.session_state["fullsystemdf"]),
   file_name='system.csv',
   mime='text/csv',
 )

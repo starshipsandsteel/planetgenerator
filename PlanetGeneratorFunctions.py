@@ -7,173 +7,188 @@ import pandas as pd
 from noise import snoise3
 import os
 
-def newplanet(planetdb,selectedtype="Any",selectedsize="Any",orbitdistance=0,planetseed=0):
-    if planetseed==0 or planetseed is None or planetseed=="":
-        random_data = os.urandom(8)
-        seed = int(int.from_bytes(random_data, byteorder="big")/1000000000000)
-        seed=f"svrn-{seed}"
-        random.seed(str(seed))
+def newplanet(planetdb,selectedtype="Any",selectedsize="Any",orbitdistance=0,planetseed=0,systemseed=0):
 
-    else:
-        seed=planetseed
-        random.seed(planetseed)
-
-    planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal","Steppe"]
-    outerplanetype=["Gas Giant","Gas Giant","Gas Giant","Rocky"]
-    planetsize=["Dwarf","Small","Small","Medium","Medium","Medium","Large","Giant"]
-    planetfeatures=["Massive Canyon System","Towering Spires","Unique Weather Phenomenon","Massive Sinkholes","Titanic Geysers",
-                    "Craters","Colossal Fossils", "Hostile Life: Flora","Hostile Life: Fauna"]
-    #planetmood=["Vibrant and Lush","Dark and Gritty","Mysterious and Eerie","Ancient and Weathered","Pristine and Serene"]
-    planetsettlements=["None","Sparse","Scattered","Dense"]
-    planetsettlmentsize=["Outposts","Colony","Towns","Cities","Metropolis"]
-    planetplotcolor={"Desert":'darkgoldenrod',"Jungle":'darkgreen',"Oceanic":'blue',"Volcanic":'red',
-                 "Frozen":'aqua',"Rocky":"brown","Crystal":'purple',"Steppe":"greenyellow","None":"black",
-                 "Asteroid":"brown","Gas Giant":"pink"}
-    planetdevelopment=["Low","Low","Medium","Medium","High"]
-    pricemodifier=[1,1,1,1,1.25,1.25,1.5,1.5,1.75,1.75,2]
-    planetarylaw=["Low","Medium","High","Martial","Military"]
-    planetdistance=["Close","Close","Medium","Medium","Far","Far","Extreme","Extreme"]
-    planetatmospheretype=["Normal","Thin","Trace","Thick"]
-    planetatmosphere=["Yes","No"]
-    atmobreathable=["Breathable","Breathable","Breathable","Toxic Clouds","Acid Rain"]
-    planeticecaps=["None","Small","Medium","Large"]
-    planet_prefixes = [
-        "Zor", "Kry", "Xan", "Vel", "Qua", 
-        "Tel", "Myr", "Gal", "Ar", "Kor", 
-        "Ax", "Fen", "Nar", "Pro", "Zar", 
-        "Del", "Vir", "Eon", "Ul", "Oth"
-    ]
-    planet_root_words = [
-        "Thar", "Lon", "Xen", "Phor", "Trios", 
-        "Altis", "Varn", "Solis", "Nox", "Tera", 
-        "Malos", "Luma", "Vorax", "Drax", "Aurion", 
-        "Zetra", "Pyra", "Vexis", "Jorun", "Osca",
-        "Zyn", "Orin", "Quor", "Lira", "Thalos", 
-        "Vexar", "Nyxis", "Krad", "Ophi", "Seron", 
-        "Drava", "Polus", "Kyra", "Xerath", "Tarin", 
-        "Malthor", "Zephy", "Arkon", "Lyros", "Cindral"
-    ]
-    planet_suffixes = [
-        "on", "is", "ar", "ix", "us", 
-        "ia", "or", "ul", "an", "eus", 
-        "en", "ax"
-    ]
-    planet_numbers_designations = [
-        "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", 
-        "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", 
-        "A", "B", "C", "D", "E", "X", "Y", "Z", "Alpha", "Beta", 
-        "Gamma", "Delta", "Epsilon", "Prime", "Omega", "Sigma", "Kappa", "Rho", "Phi", "Tau",
-        "Noh","Rah","Tev","Kri","Voh","Lah","Zin","Sha","Tor","Fyn"
-    ]
-
-    tempmodifier={"Close":10,"Medium":0,"Far":-10,"Extreme":-20}
-    typetempmodifier={"Desert":20,"Jungle":20,"Oceanic":0,"Volcanic":10,"Frozen":-50,"Rocky":0,"Crystal":0,"Steppe":0,"Gas Giant":0}
-    basetemp={"Desert":20,"Jungle":20,"Oceanic":15,"Volcanic":10,"Frozen":-10,"Rocky":0,"Gas Giant w/ Moons":0,"Crystal":0,"Steppe":20,"Gas Giant":50}
-    gravitymod={"Dwarf":0.75,"Small":0.85,"Medium":1,"Large":1.3,"Giant":2,"Gas Giant Moon":0.75,"Gas Giant":5}
-    daymod={"Dwarf":-5,"Small":-3,"Medium":0,"Large":2,"Giant":4,"Gas Giant Moon":0,"Gas Giant":10}
-    planetdisplaysize={"Dwarf":10,"Small":15,"Medium":25,"Large":35,"Giant":45,"Gas Giant Moon":0.75,"Asteroid":8,"Small Gas Giant":55,"Gas Giant":70}
 
     orbit=15+(10*orbitdistance)
-
-    if selectedtype=="Any":
-        type=random.choice(planettype)
-    else:
-        if orbitdistance>4:
-            type=np.random.choice(outerplanetype)
-        else:
-            type=np.random.choice(planettype)
+    if selectedtype=="Asteroid" or selectedtype=="None":
         type=selectedtype
-    if selectedsize=="Any":
-        size=random.choice(planetsize)
+
+        planet_dict={"name":type,
+                     "type":type,
+                     "record id":type,
+                     "orbit":orbit,
+                     "plotsize":8}
+        # Asteroids and None
     else:
-        size=selectedsize
+        if systemseed != 00 or systemseed is not None or systemseed !="":
 
-    if type=="Gas Giant":
-        icecaps="None"
-        settlements="None"
-        moons=random.randint(1,5)
-        features = f"{moons} terrestrial moons."
-        featurelist=features
-        size="Gas Giant"
-    else:
-        icecaps=random.choice(planeticecaps)
-        settlements=random.choice(planetsettlements)
-        numfeat=random.randint(1,4)
-        features=random.sample(planetfeatures,numfeat)
-        featurelist=", ".join(features)
+            seed=f"svrn-{systemseed}-{str(orbit)}"
+            random.seed(seed)
+        elif planetseed==0 or planetseed is None or planetseed=="":
+            random_data = os.urandom(8)
+            seed = int(int.from_bytes(random_data, byteorder="big")/1000000000000)
+            seed=f"svrn-{seed}"
+            random.seed(str(seed))
+        else:
+            seed=planetseed
+            random.seed(planetseed)
+
+        planettype=["Desert","Jungle","Oceanic","Volcanic","Frozen","Rocky","Crystal","Steppe"]
+        outerplanetype=["Gas Giant","Gas Giant","Gas Giant","Rocky"]
+        planetsize=["Dwarf","Small","Small","Medium","Medium","Medium","Large","Giant"]
+        planetfeatures=["Massive Canyon System","Towering Spires","Unique Weather Phenomenon","Massive Sinkholes","Titanic Geysers",
+                        "Craters","Colossal Fossils", "Hostile Life: Flora","Hostile Life: Fauna"]
+        #planetmood=["Vibrant and Lush","Dark and Gritty","Mysterious and Eerie","Ancient and Weathered","Pristine and Serene"]
+        planetsettlements=["None","Sparse","Scattered","Dense"]
+        planetsettlmentsize=["Outposts","Colony","Towns","Cities","Metropolis"]
+        planetplotcolor={"Desert":'darkgoldenrod',"Jungle":'darkgreen',"Oceanic":'blue',"Volcanic":'red',
+                    "Frozen":'aqua',"Rocky":"brown","Crystal":'purple',"Steppe":"greenyellow","None":"black",
+                    "Asteroid":"brown","Gas Giant":"pink"}
+        planetdevelopment=["Low","Low","Medium","Medium","High"]
+        pricemodifier=[1,1,1,1,1.25,1.25,1.5,1.5,1.75,1.75,2]
+        planetarylaw=["Low","Medium","High","Martial","Military"]
+        planetdistance=["Close","Close","Medium","Medium","Far","Far","Extreme","Extreme"]
+        planetatmospheretype=["Normal","Thin","Trace","Thick"]
+        planetatmosphere=["Yes","No"]
+        atmobreathable=["Breathable","Breathable","Breathable","Toxic Clouds","Acid Rain"]
+        planeticecaps=["None","Small","Medium","Large"]
+        planet_prefixes = [
+            "Zor", "Kry", "Xan", "Vel", "Qua", 
+            "Tel", "Myr", "Gal", "Ar", "Kor", 
+            "Ax", "Fen", "Nar", "Pro", "Zar", 
+            "Del", "Vir", "Eon", "Ul", "Oth"
+        ]
+        planet_root_words = [
+            "Thar", "Lon", "Xen", "Phor", "Trios", 
+            "Altis", "Varn", "Solis", "Nox", "Tera", 
+            "Malos", "Luma", "Vorax", "Drax", "Aurion", 
+            "Zetra", "Pyra", "Vexis", "Jorun", "Osca",
+            "Zyn", "Orin", "Quor", "Lira", "Thalos", 
+            "Vexar", "Nyxis", "Krad", "Ophi", "Seron", 
+            "Drava", "Polus", "Kyra", "Xerath", "Tarin", 
+            "Malthor", "Zephy", "Arkon", "Lyros", "Cindral"
+        ]
+        planet_suffixes = [
+            "on", "is", "ar", "ix", "us", 
+            "ia", "or", "ul", "an", "eus", 
+            "en", "ax"
+        ]
+        planet_numbers_designations = [
+            "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", 
+            "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", 
+            "A", "B", "C", "D", "E", "X", "Y", "Z", "Alpha", "Beta", 
+            "Gamma", "Delta", "Epsilon", "Prime", "Omega", "Sigma", "Kappa", "Rho", "Phi", "Tau",
+            "Noh","Rah","Tev","Kri","Voh","Lah","Zin","Sha","Tor","Fyn"
+        ]
+
+        tempmodifier={"Close":10,"Medium":0,"Far":-10,"Extreme":-20}
+        typetempmodifier={"Desert":20,"Jungle":20,"Oceanic":0,"Volcanic":10,"Frozen":-50,"Rocky":0,"Crystal":0,"Steppe":0,"Gas Giant":0}
+        basetemp={"Desert":20,"Jungle":20,"Oceanic":15,"Volcanic":10,"Frozen":-10,"Rocky":0,"Gas Giant w/ Moons":0,"Crystal":0,"Steppe":20,"Gas Giant":50}
+        gravitymod={"Dwarf":0.75,"Small":0.85,"Medium":1,"Large":1.3,"Giant":2,"Gas Giant Moon":0.75,"Gas Giant":5}
+        daymod={"Dwarf":-5,"Small":-3,"Medium":0,"Large":2,"Giant":4,"Gas Giant Moon":0,"Gas Giant":10}
+        planetdisplaysize={"Dwarf":10,"Small":15,"Medium":25,"Large":35,"Giant":45,"Gas Giant Moon":0.75,"Asteroid":8,"Small Gas Giant":55,"Gas Giant":70}
 
 
-    if settlements!="None":
-        settlementsize=random.choice(planetsettlmentsize)
-        law=random.choice(planetarylaw)
-        development=random.choice(planetdevelopment)
-        price=random.choice(pricemodifier)
-    else:    
-        settlementsize="N/A"
-        law="N/A"
-        development="N/A"
-        price="-999"
+        if selectedtype=="Any":
+            type=random.choice(planettype)
+        else:
+            if orbitdistance>4:
+                type=np.random.choice(outerplanetype)
+            else:
+                type=np.random.choice(planettype)
+            type=selectedtype
+        if selectedsize=="Any":
+            size=random.choice(planetsize)
+        else:
+            size=selectedsize
 
-    planetatmochoice=random.choice(planetatmosphere)   
-    if type=="Oceanic" or type=="Jungle":
-        planetatmochoice="Yes"
-    if planetatmochoice=="Yes":
-        atmosphere=random.choice(planetatmospheretype)
-        breathable=random.choice(atmobreathable)
-    else:
-        atmosphere="None"
-        breathable="None"
+        if type=="Gas Giant":
+            icecaps="None"
+            settlements="None"
+            moons=random.randint(1,5)
+            features = f"{moons} terrestrial moons."
+            featurelist=features
+            size="Gas Giant"
+        else:
+            icecaps=random.choice(planeticecaps)
+            settlements=random.choice(planetsettlements)
+            numfeat=random.randint(1,4)
+            features=random.sample(planetfeatures,numfeat)
+            featurelist=", ".join(features)
 
-    if orbitdistance==0:
-        distance=random.choice(planetdistance)
-    else:
-        distance=planetdistance[orbitdistance]
 
-    plotsize=planetdisplaysize[size]
-    plotcolor=planetplotcolor[type]
-    temp=random.randint(10,30)+tempmodifier[distance]+basetemp[type]+typetempmodifier[type]
-    gravity=round((random.randint(8,12))/10*gravitymod[size],1)
-    hoursinday=random.randint(10,50)+daymod[size]
+        if settlements!="None":
+            settlementsize=random.choice(planetsettlmentsize)
+            law=random.choice(planetarylaw)
+            development=random.choice(planetdevelopment)
+            price=random.choice(pricemodifier)
+        else:    
+            settlementsize="N/A"
+            law="N/A"
+            development="N/A"
+            price="-999"
 
-    planetnameswitch=random.randint(0,4)
-    prefix=random.choice(planet_prefixes)
-    root=random.choice(planet_root_words)
-    suffix=random.choice(planet_suffixes)
-    designation=random.choice(planet_numbers_designations)
+        planetatmochoice=random.choice(planetatmosphere)   
+        if type=="Oceanic" or type=="Jungle":
+            planetatmochoice="Yes"
+        if planetatmochoice=="Yes":
+            atmosphere=random.choice(planetatmospheretype)
+            breathable=random.choice(atmobreathable)
+        else:
+            atmosphere="None"
+            breathable="None"
 
-    if planetnameswitch==0:
-        planetname=prefix+root
-    elif planetnameswitch==1:
-        planetname=prefix+root+suffix
-    elif planetnameswitch==2:
-        planetname=root
-    elif planetnameswitch==3:
-        planetname=root+"-"+designation
-    elif planetnameswitch==4:
-        planetname=prefix+root+"-"+designation
+        if orbitdistance==0:
+            distance=random.choice(planetdistance)
+        else:
+            distance=planetdistance[orbitdistance]
 
-    graphicseed=random.randint(0,1000000)
-    planet_dict={"name":planetname.title(),
-                "type":type,
-                "size":size,
-                "features":featurelist,
-                "icecaps":icecaps,
-                "settlement size":settlementsize,
-                "settlements":settlements,
-                "development":development,
-                "law":law,
-                "Price modifier":price,
-                "distance to star":distance,
-                "orbit":orbit,
-                "plotsize":plotsize,
-                "color":plotcolor,
-                "Avg temperature (c)":temp,
-                "atmosphere":atmosphere,
-                "atmosphere notes":breathable,
-                "gravity":gravity,
-                "hours in day":hoursinday,
-                "graphicseed":graphicseed,
-                "record id":seed}
+        plotsize=planetdisplaysize[size]
+        plotcolor=planetplotcolor[type]
+        temp=random.randint(10,30)+tempmodifier[distance]+basetemp[type]+typetempmodifier[type]
+        gravity=round((random.randint(8,12))/10*gravitymod[size],1)
+        hoursinday=random.randint(10,50)+daymod[size]
+
+        planetnameswitch=random.randint(0,4)
+        prefix=random.choice(planet_prefixes)
+        root=random.choice(planet_root_words)
+        suffix=random.choice(planet_suffixes)
+        designation=random.choice(planet_numbers_designations)
+
+        if planetnameswitch==0:
+            planetname=prefix+root
+        elif planetnameswitch==1:
+            planetname=prefix+root+suffix
+        elif planetnameswitch==2:
+            planetname=root
+        elif planetnameswitch==3:
+            planetname=root+"-"+designation
+        elif planetnameswitch==4:
+            planetname=prefix+root+"-"+designation
+
+        graphicseed=random.randint(0,1000000)
+        planet_dict={"name":planetname.title(),
+                    "type":type,
+                    "size":size,
+                    "features":featurelist,
+                    "icecaps":icecaps,
+                    "settlement size":settlementsize,
+                    "settlements":settlements,
+                    "development":development,
+                    "law":law,
+                    "Price modifier":price,
+                    "distance to star":distance,
+                    "orbit":orbit,
+                    "plotsize":plotsize,
+                    "color":plotcolor,
+                    "Avg temperature (c)":temp,
+                    "atmosphere":atmosphere,
+                    "atmosphere notes":breathable,
+                    "gravity":gravity,
+                    "hours in day":hoursinday,
+                    "graphicseed":graphicseed,
+                    "record id":seed}
 
     tempplanetdb=pd.DataFrame(planet_dict,index=[0])
 
