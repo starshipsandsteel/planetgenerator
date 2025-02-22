@@ -293,6 +293,10 @@ tab1,tab2=st.tabs(["System View","Planet Explorer"])
 
 config_globe = {'displayModeBar': True,
         'use_container_width':False}
+config_map = {'displayModeBar': True,
+        'use_container_width':False}
+
+
 with tab1:
     st.header(f"Star: {st.session_state['fullsystemdf']['systemname'].iloc[0]}")
     st.write(f"Star: {st.session_state['fullsystemdf']['startype'].iloc[0]}")
@@ -307,12 +311,30 @@ with tab2:
     choice=st.selectbox("Choose Planet to View",st.session_state["systemdf"]["name"])
     print(choice)
     chosenplanet=st.session_state["systemdf"][st.session_state["systemdf"]["name"]==choice]  # Filter
-    planetseed=int(chosenplanet["graphicseed"].iloc[0])
-    print(planetseed)
+    if len(chosenplanet)>0:
+        planetseed=int(chosenplanet["graphicseed"].iloc[0])
+        print(planetseed)
+        fig,fig_flat_poi,fig_flat,poinumber=planet_graphics(chosenplanet["type"].iloc[0],chosenplanet["icecaps"].iloc[0],chosenplanet["size"].iloc[0],graphicseed=planetseed)
+        col1, col2 = st.columns(2,vertical_alignment="top",border=True)
+        planet_dict=chosenplanet.squeeze().to_dict()
+        print(planet_dict)
+        for x in planet_dict:
+            cells_donotplot=["name","graphicseed","orbit","color","plotsize"]
+            if x not in cells_donotplot:
+                    with col1:
+                        st.write (f"{x.title()}: {planet_dict[x]}")
+        with col2:
+            col2.plotly_chart(fig,config=config_globe)
+        st.write('## Planetary Map View')
+        poi_onoff=st.toggle("Show POIs")
+        if poi_onoff:
+            st.plotly_chart(fig_flat_poi)
+        else:
+            st.plotly_chart(fig_flat)
+    else:
+        st.write("No planets to display.")
 
-
-    fig,fig_flat_poi,fig_flat,poinumber=planet_graphics(chosenplanet["type"].iloc[0],chosenplanet["icecaps"].iloc[0],chosenplanet["size"].iloc[0],graphicseed=planetseed)
-    tab2.plotly_chart(fig,config=config_globe)
+    #tab2.plotly_chart(fig,config=config_globe)
 st.download_button(
   label="Download Planetary Records",
   data=convert_df_to_csv(st.session_state["fullsystemdf"]),

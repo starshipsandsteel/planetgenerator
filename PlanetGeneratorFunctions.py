@@ -413,7 +413,8 @@ def planet_graphics(type,caps,size,graphicseed=0):
         xaxis=dict(visible=False),
         yaxis=dict(visible=False),
         plot_bgcolor='black',
-        width=1800
+        width=1200,
+        height=600
     )
     fig_flat.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
@@ -421,7 +422,8 @@ def planet_graphics(type,caps,size,graphicseed=0):
         xaxis=dict(visible=False),
         yaxis=dict(visible=False),
         plot_bgcolor='black',
-        width=1800
+        width=1200,
+        height=600
     )
 
     return fig,fig_flat_poi,fig_flat,poinumber
