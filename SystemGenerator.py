@@ -29,7 +29,7 @@ def generate_system(seed=0):
         seed=f"sys-svrn-{seed}"
         random.seed(str(seed))
     else:
-        print(f"Generating {seed}")
+        #print(f"Generating {seed}")
         random.seed(seed)
     systemdf=pd.DataFrame()
 
@@ -142,7 +142,7 @@ def generate_system(seed=0):
         #    size=np.random.choice(planetsize)
         #
         #def newplanet(planetdb,selectedtype="Any",selectedsize="Any",orbitdistance=0,planetseed=0):
-        print(f"Seed being passed to planet: {seed}")
+        #print(f"Seed being passed to planet: {seed}")
         planetdict,systemdf=newplanet(systemdf,selectedtype=type,orbitdistance=x,systemseed=seed)
         
         #'''
@@ -252,16 +252,20 @@ st.markdown(
     """, unsafe_allow_html=True
 )
 
-systemdf=pd.DataFrame()
-fig,systemdf,fullsystemdf,asteroiddf,seed=generate_system()
 
 if "init" not in st.session_state:
+    print("Initalizing...")
+    systemdf=pd.DataFrame()
+    fullsystemdf=pd.DataFrame()
+    fig,systemdf,fullsystemdf,asteroiddf,seed=generate_system()
+if "init" not in st.session_state:
     st.session_state["init"]=1
+
 if "systemdf" not in st.session_state:
     st.session_state["systemdf"]=systemdf
 if "systemfig" not in st.session_state:
     st.session_state["systemfig"]=fig
-if "fullsystemfig" not in st.session_state:
+if "fullsystemdf" not in st.session_state:
     st.session_state["fullsystemdf"]=fullsystemdf
     print("Added to Session State")
 if "asteroiddf" not in st.session_state:
@@ -269,16 +273,15 @@ if "asteroiddf" not in st.session_state:
 if "systemseed" not in st.session_state:
     st.session_state["systemseed"]=seed
 
+print(st.session_state["fullsystemdf"])
 
 # Set app title
-
 st.title("Galactic Cartographers: System View")
-
 
 with st.sidebar:
     st.image("https://i.imgur.com/PCS1XPq.png")
     systemseed=st.text_input("System ID")
-    if(st.button("Retrieve New System")):
+    if(st.button("Retrieve System")):
         st.session_state["systemfig"],st.session_state["systemdf"],st.session_state["fullsystemdf"],st.session_state["asteroiddf"],st.session_state["systemseed"]=generate_system(systemseed)
     st.write("Welcome to the Department of Galactic Cartography, an online catalog of nearly limitless worlds, surveyed or not.")
     st.write("-------------------------------")
@@ -297,15 +300,13 @@ with tab1:
     st.plotly_chart(st.session_state["systemfig"],config=config_globe)
     st.dataframe(st.session_state["systemdf"])
 
-
-
 with tab2:
     st.header(f"Star: {st.session_state['fullsystemdf']['systemname'].iloc[0]}")
     st.write(f"Star: {st.session_state['fullsystemdf']['startype'].iloc[0]}")
     st.write(f"System ID: {st.session_state['fullsystemdf']['system id'].iloc[0]}")
     choice=st.selectbox("Choose Planet to View",st.session_state["systemdf"]["name"])
     print(choice)
-    chosenplanet=st.session_state["systemdf"][st.session_state["systemdf"]["name"]==choice]
+    chosenplanet=st.session_state["systemdf"][st.session_state["systemdf"]["name"]==choice]  # Filter
     planetseed=int(chosenplanet["graphicseed"].iloc[0])
     print(planetseed)
 
