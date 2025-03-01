@@ -21,8 +21,38 @@ def ellipse_arc(x_center=0, y_center=0, a=1, b =1, start_angle=0, end_angle=2*np
         path += ' Z'
     return path
 
+def generate_object(seed=0):
+    if seed==0 or seed is None or seed=="":
+        random_data = os.urandom(8)
+        seed = int(int.from_bytes(random_data, byteorder="big")/1000000000000)
+        seed=f"sys-svrn-{seed}"
+        random.seed(str(seed))
+    else:
+        random.seed(seed)
+    #systemdf=pd.DataFrame()
+    objects_of_interest = [
+        # Artificial Structures
+        "Derelict Ship",
+        "Orbital Ruins",
+        "Lost Colony",
+        "Mining Facility",
+        "Jump Gate",
+        "Beacon",
+        "Alien Megastructure",
+        "Space Elevator",
+        "Artificial Moon",
+        
+        # Strange & Unexplained
+        "Ghost Ship",
+        "Artificial Intelligence Core",
+        "Temporal Distortion",
+        "Biological Hive Ship",
+        "The Vault"
+    ]
+    object = random.choice(objects_of_interest)
+
 def generate_system(seed=0):
-    #print(seed)
+    print("Starting...")
     if seed==0 or seed is None or seed=="":
         random_data = os.urandom(8)
         seed = int(int.from_bytes(random_data, byteorder="big")/1000000000000)
@@ -122,54 +152,43 @@ def generate_system(seed=0):
     starcolor=star_colors[star]
     starsize=star_sizes[star]
     minorbit=star_orbits[star]
+    skipgate=0
     #print(minorbit)
     for x in range(minorbit,8):
         orbitrow=[]
         
         planettype=["Any","Any","Any","Any","Any","Any","Any","Any","None","None","Asteroid","Asteroid"]
-        outerplanetype=["Any","Any","Any","Any"]
-        #planetsize=["Dwarf","Small","Small","Medium","Medium","Medium","Large","Giant"]
-        #gasgiantsize=["Giant","Gas Giant","Small Gas Giant"]
-        #planetcolor={"Desert":'darkgoldenrod',"Jungle":'darkgreen',"Oceanic":'blue',"Volcanic":'red',"Frozen":'aqua',"Rocky":"brown","Crystal":'purple',"Steppe":"greenyellow","None":"black","Asteroid":"brown","Gas Giant":"pink"}
-        #planetdisplaysize={"Dwarf":10,"Small":15,"Medium":25,"Large":35,"Giant":45,"Gas Giant Moon":0.75,"Asteroid":8,"Small Gas Giant":55,"Gas Giant":70}
-        if x-minorbit>4:
-            type=random.choice(outerplanetype)
-        else:
-            type=random.choice(planettype)
-        #if type=="Gas Giant":
-        #    size=np.random.choice(gasgiantsize)
+        #outerplanetype=["Any","Any","Any","Any"]
+          
+        #if x-minorbit>4:
+        #    type=random.choice(outerplanetype)
         #else:
-        #    size=np.random.choice(planetsize)
-        #
-        #def newplanet(planetdb,selectedtype="Any",selectedsize="Any",orbitdistance=0,planetseed=0):
-        #print(f"Seed being passed to planet: {seed}")
-        planetdict,systemdf=newplanet(systemdf,selectedtype=type,orbitdistance=x,systemseed=seed)
+        type=random.choice(planettype)
         
-        #'''
-        #orbitrow.append(type)
-        #orbitrow.append(planetcolor[type])
-        #orbitrow.append(size)
-        #orbitrow.append(planetdisplaysize[size])
-        #orbitrow.append(orbit)
-        #orbitrow.append(x)
-        #orbitrow.append(10)
-        #'''
-        #systemdf.loc[len(systemdf)]=orbitrow
+        skip=random.randint(0,1)
+        if (x==7 and skipgate==0 and x>minorbit) or (skip==1 and skipgate==0 and x>minorbit):
+            skipgate=1
+            planetdict,systemdf=newplanet(systemdf,selectedtype=type,orbitdistance=x,skip=1,systemseed=seed)
+        else:
+            planetdict,systemdf=newplanet(systemdf,selectedtype=type,orbitdistance=x,skip=0,systemseed=seed)
+
     systemdf["level"]=10
     systemdf["startype"]=star
     systemdf["systemname"]=systemname
     systemdf["system id"]=seed
+
     fullsystemdf=pd.DataFrame()
     fullsystemdf=systemdf
-    #print(fullsystemdf)
-    systemdf=systemdf[systemdf["type"]!="None"]
-    asteroiddf=systemdf[systemdf["type"]=="Asteroid"]
-    #print(f"Star: {star}")
-    #print(asteroiddf)
-    systemdf=systemdf[systemdf["type"]!="Asteroid"]
-    #print(systemdf)
-    
 
+    skipdf=fullsystemdf[fullsystemdf["skipgate"]==1]
+    print(skipdf)
+    print(fullsystemdf["skipgate"])
+    systemdf=systemdf[systemdf["type"].str.contains("None")==False]
+    asteroiddf=systemdf[systemdf["type"].str.contains("Asteroid")]
+    systemdf=systemdf[systemdf["type"].str.contains("Asteroid")==False]
+
+
+   
     fig=go.Figure()
     fig.add_trace(go.Scatter(x=[0],y=[10],mode='markers',marker=dict(size=starsize+10,color='black',line=dict(color=starcolor,width=2))))
     fig.add_trace(go.Scatter(x=[0],y=[10],mode='markers',marker=dict(size=starsize,color=starcolor)))
@@ -182,10 +201,12 @@ def generate_system(seed=0):
         orbitalpaths.append(dict(type="path", path=ellipse_arc(y_center=10,a=orbitpos["orbit"],b=orbitpos["orbit"]-5,N=60),line_color="white",line_width=0.25,line_dash="dot"))
 
     #print(len(systemdf))
+    print(systemdf)
     if (len(systemdf))>0:
         fig.add_trace(go.Scatter(x=systemdf["orbit"],y=systemdf["level"],mode='markers',marker=dict(size=systemdf["plotsize"],color=systemdf["color"],line=dict(color='black'))))
         fig.add_trace(go.Scatter(x=systemdf["orbit"],y=systemdf["level"],mode='markers',text=["test"],textfont=dict(color="white",size=20),marker=dict(size=systemdf["plotsize"],color=systemdf["color"],line=dict(color='black'))))
 
+    # Draw asteroids
     for x in range(0,10):
         offsetx=random.uniform(-.25,.25)
         offsety=random.uniform(-2,2)
@@ -196,6 +217,9 @@ def generate_system(seed=0):
         offsety=random.uniform(-2,2)
         offsetangle=random.randint(0,90)
         fig.add_trace(go.Scatter(x=asteroiddf["orbit"]+offsetx,y=asteroiddf["level"]+offsety,mode='markers',marker_symbol="octagon",text=asteroiddf["type"],marker=dict(angle=offsetangle,size=5,color="slategrey",line=dict(color='black'))))
+
+    fig.add_trace(go.Scatter(x=skipdf["orbit"],y=skipdf["level"]+2.5,mode='markers',marker_symbol="square-dot",text="Skip gate",marker=dict(size=10,color="red",line=dict(color='black'))))
+
 
     fig.update_xaxes(visible=False)
     fig.update_yaxes(visible=False)
@@ -254,7 +278,7 @@ st.markdown(
 
 
 if "init" not in st.session_state:
-    print("Initalizing...")
+    #print("Initalizing...")
     systemdf=pd.DataFrame()
     fullsystemdf=pd.DataFrame()
     fig,systemdf,fullsystemdf,asteroiddf,seed=generate_system()
@@ -267,13 +291,13 @@ if "systemfig" not in st.session_state:
     st.session_state["systemfig"]=fig
 if "fullsystemdf" not in st.session_state:
     st.session_state["fullsystemdf"]=fullsystemdf
-    print("Added to Session State")
+    #print("Added to Session State")
 if "asteroiddf" not in st.session_state:
     st.session_state["asteroiddf"]=asteroiddf
 if "systemseed" not in st.session_state:
     st.session_state["systemseed"]=seed
 
-print(st.session_state["fullsystemdf"])
+#print(st.session_state["fullsystemdf"])
 
 # Set app title
 st.title("Galactic Cartographers: System View")
@@ -309,15 +333,15 @@ with tab2:
     st.write(f"Star: {st.session_state['fullsystemdf']['startype'].iloc[0]}")
     st.write(f"System ID: {st.session_state['fullsystemdf']['system id'].iloc[0]}")
     choice=st.selectbox("Choose Planet to View",st.session_state["systemdf"]["name"])
-    print(choice)
+    #print(choice)
     chosenplanet=st.session_state["systemdf"][st.session_state["systemdf"]["name"]==choice]  # Filter
     if len(chosenplanet)>0:
         planetseed=int(chosenplanet["graphicseed"].iloc[0])
-        print(planetseed)
+        #print(planetseed)
         fig,fig_flat_poi,fig_flat,poinumber=planet_graphics(chosenplanet["type"].iloc[0],chosenplanet["icecaps"].iloc[0],chosenplanet["size"].iloc[0],graphicseed=planetseed)
         col1, col2 = st.columns(2,vertical_alignment="top",border=True)
         planet_dict=chosenplanet.squeeze().to_dict()
-        print(planet_dict)
+        #print(planet_dict)
         for x in planet_dict:
             cells_donotplot=["name","graphicseed","orbit","color","plotsize"]
             if x not in cells_donotplot:

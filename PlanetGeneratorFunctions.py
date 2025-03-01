@@ -7,17 +7,18 @@ import pandas as pd
 from noise import snoise3
 import os
 
-def newplanet(planetdb,selectedtype="Any",selectedsize="Any",orbitdistance=0,planetseed=0,systemseed=0):
+def newplanet(planetdb,selectedtype="Any",selectedsize="Any",orbitdistance=0,planetseed=0,skip=0,systemseed=0):
 
 
     orbit=15+(10*orbitdistance)
     if selectedtype=="Asteroid" or selectedtype=="None":
-        type=selectedtype
+        type=selectedtype+str(orbit)
 
         planet_dict={"name":type,
                      "type":type,
                      "record id":type,
                      "orbit":orbit,
+                     "skipgate":skip,
                      "plotsize":8}
         # Asteroids and None
     else:
@@ -186,6 +187,7 @@ def newplanet(planetdb,selectedtype="Any",selectedsize="Any",orbitdistance=0,pla
                     "atmosphere":atmosphere,
                     "atmosphere notes":breathable,
                     "gravity":gravity,
+                    "skipgate":skip,
                     "hours in day":hoursinday,
                     "graphicseed":graphicseed,
                     "record id":seed}
